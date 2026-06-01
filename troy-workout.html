@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="My Training">
+<title>My Training Protocol</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0a0f; --card: #111118; --border: #1e1e2e;
+    --accent: #e8572a; --accent-soft: rgba(232,87,42,0.12);
+    --blue: #3b82f6; --blue-soft: rgba(59,130,246,0.12);
+    --green: #22c55e; --green-soft: rgba(34,197,94,0.12);
+    --gold: #f59e0b; --gold-soft: rgba(245,158,11,0.12);
+    --purple: #a855f7; --purple-soft: rgba(168,85,247,0.12);
+    --text: #f0f0f0; --muted: #6b7280; --subtle: #374151;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Barlow', sans-serif; overflow: hidden; }
+  .app { display: flex; flex-direction: column; height: 100%; padding-top: var(--safe-top); }
+  .header { padding: 20px 20px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .header-eyebrow { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 3px; color: var(--accent); margin-bottom: 4px; }
+  .header-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; line-height: 1; margin-bottom: 4px; }
+  .header-title span { color: var(--accent); }
+  .header-sub { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+  .header-banner { background: var(--purple-soft); border: 1px solid rgba(168,85,247,0.3); border-radius: 10px; padding: 10px 14px; font-size: 12px; color: #c084fc; line-height: 1.5; }
+  .nav { display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .nav::-webkit-scrollbar { display: none; }
+  .nav-btn { background: none; border: none; border-bottom: 2px solid transparent; color: var(--muted); font-family: 'Barlow', sans-serif; font-weight: 600; font-size: 13px; padding: 13px 16px 11px; cursor: pointer; white-space: nowrap; transition: all 0.15s; flex-shrink: 0; }
+  .nav-btn.active { color: var(--text); border-bottom-color: var(--accent); }
+  .content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 18px 20px; padding-bottom: calc(20px + var(--safe-bottom)); }
+  .slabel { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 2px; color: var(--muted); margin-bottom: 10px; margin-top: 4px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 10px; }
+  .day-selector { display: flex; gap: 8px; margin-bottom: 18px; }
+  .day-btn { flex: 1; border-radius: 12px; padding: 12px 10px; cursor: pointer; border: 1px solid var(--border); background: var(--card); transition: all 0.2s; }
+  .day-btn .day-label { font-family: 'Barlow Condensed', sans-serif; font-size: 10px; letter-spacing: 2px; margin-bottom: 3px; }
+  .day-btn .day-title { font-weight: 700; font-size: 12px; color: var(--text); line-height: 1.2; }
+  .ex-row { border-radius: 10px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); margin-bottom: 8px; overflow: hidden; transition: all 0.2s; }
+  .ex-row.done { background: rgba(34,197,94,0.06); border-color: rgba(34,197,94,0.25); opacity: 0.55; }
+  .ex-inner { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; }
+  .ex-check { min-width: 22px; height: 22px; border-radius: 6px; border: 2px solid var(--subtle); background: transparent; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #fff; flex-shrink: 0; margin-top: 1px; cursor: pointer; transition: all 0.2s; }
+  .ex-check.checked { border-color: var(--green); background: var(--green); }
+  .ex-body { flex: 1; }
+  .ex-name { font-weight: 600; font-size: 14px; color: var(--text); }
+  .ex-name.priority { color: var(--gold); }
+  .ex-name.done-text { text-decoration: line-through; }
+  .ex-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+  .tag { font-size: 11px; color: var(--muted); background: rgba(255,255,255,0.05); padding: 2px 7px; border-radius: 20px; }
+  .ex-note { font-size: 12px; color: var(--muted); margin-top: 3px; line-height: 1.4; }
+  .how-btn { background: rgba(255,255,255,0.06); border: 1px solid var(--border); border-radius: 8px; padding: 5px 10px; cursor: pointer; font-size: 11px; color: var(--muted); flex-shrink: 0; font-family: 'Barlow', sans-serif; font-weight: 600; }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 1000; display: flex; align-items: flex-end; justify-content: center; }
+  .modal-overlay.hidden { display: none; }
+  .modal-box { background: var(--card); border: 1px solid var(--border); border-radius: 20px 20px 0 0; padding: 24px 20px; padding-bottom: calc(40px + var(--safe-bottom)); width: 100%; max-width: 500px; max-height: 82vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .modal-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 18px; color: var(--text); }
+  .modal-close { background: rgba(255,255,255,0.1); border: none; color: var(--text); border-radius: 8px; padding: 6px 14px; cursor: pointer; font-size: 13px; font-family: 'Barlow', sans-serif; }
+  .modal-img { width: 100%; height: auto; border-radius: 12px; margin-bottom: 16px; display: block; }
+  .yt-link { display: flex; align-items: center; gap: 10px; background: rgba(255,0,0,0.12); border: 1px solid rgba(255,0,0,0.25); border-radius: 10px; padding: 12px 14px; margin-bottom: 16px; text-decoration: none; color: #ff6b6b; }
+  .yt-link .yt-icon { font-size: 20px; }
+  .yt-link .yt-title { font-weight: 600; font-size: 14px; }
+  .yt-link .yt-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .step-row { display: flex; gap: 12px; margin-bottom: 8px; padding: 10px 12px; background: rgba(255,255,255,0.02); border-radius: 8px; border: 1px solid var(--border); }
+  .step-num { min-width: 24px; height: 24px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; color: #fff; }
+  .step-text { font-size: 13px; color: #d0d0d0; line-height: 1.5; padding-top: 2px; }
+  .note-box { margin-top: 8px; padding: 10px 14px; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.25); border-radius: 10px; font-size: 13px; color: #d0d0d0; line-height: 1.5; }
+  .cardio-box { border-radius: 12px; padding: 12px 14px; margin-bottom: 14px; }
+  .finisher-box { border-radius: 12px; padding: 12px 14px; margin-top: 14px; background: var(--gold-soft); border: 1px solid rgba(245,158,11,0.25); }
+  .coach-box { background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; margin-top: 14px; }
+  .coach-note { font-size: 13px; color: #c0c0c0; margin-bottom: 7px; padding-left: 12px; line-height: 1.5; }
+  .week-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 8px; }
+  .week-day { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 13px; color: var(--muted); min-width: 36px; letter-spacing: 1px; }
+  .week-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .week-workout { font-weight: 600; font-size: 13px; }
+  .week-label { font-size: 11px; color: var(--muted); }
+  .vac-step { display: flex; gap: 12px; margin-bottom: 8px; padding: 10px 12px; background: rgba(255,255,255,0.02); border-radius: 8px; border: 1px solid var(--border); }
+  .vac-num { min-width: 24px; height: 24px; border-radius: 50%; background: var(--purple); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; color: #fff; }
+  .prog-row { display: flex; gap: 12px; padding: 12px 14px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px; }
+  .prog-badge { background: var(--purple); border-radius: 8px; padding: 4px 10px; font-size: 11px; font-weight: 700; color: #fff; height: fit-content; white-space: nowrap; }
+  .prog-title { font-weight: 600; font-size: 14px; color: var(--text); margin-bottom: 3px; }
+  .prog-note { font-size: 12px; color: var(--muted); }
+  .pos-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; }
+  .pos-name { font-weight: 600; font-size: 14px; color: var(--text); margin-bottom: 4px; }
+  .pos-desc { font-size: 13px; color: var(--muted); }
+  .info-block { border-radius: 12px; padding: 14px; margin-bottom: 10px; }
+  .info-title { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 2px; margin-bottom: 8px; }
+  .info-line { font-size: 13px; color: #c0c0c0; margin-bottom: 7px; line-height: 1.5; }
+  .border-left { padding-left: 12px; border-left-width: 2px; border-left-style: solid; }
+  .rec-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 10px; }
+  .rec-head { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .rec-icon { font-size: 20px; }
+  .rec-name { font-weight: 700; font-size: 15px; }
+  .rec-when { font-size: 12px; color: var(--accent); margin-bottom: 4px; }
+  .rec-benefit { font-size: 13px; color: var(--muted); }
+  /* install tip */
+  .install-tip { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); border-radius: 12px; padding: 14px; margin-bottom: 16px; font-size: 13px; color: #86efac; line-height: 1.6; }
+  .install-tip strong { color: var(--green); }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-eyebrow">PHASE 1 · WEEKS 1–4 · 3 DAYS/WEEK</div>
+    <h1 class="header-title">YOUR TRAINING<br><span>PROTOCOL</span></h1>
+    <div class="header-sub">Tap <strong>HOW?</strong> on any exercise for steps + video demo</div>
+    <div class="header-banner">🎯 <strong>Stomach Vacuums: DAILY habit</strong> — in every workout + rest days. Your lower belly secret weapon.</div>
+  </div>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <button class="nav-btn active" onclick="showTab('workout',this)">Workout</button>
+    <button class="nav-btn" onclick="showTab('vacuum',this)">Vacuums</button>
+    <button class="nav-btn" onclick="showTab('schedule',this)">Schedule</button>
+    <button class="nav-btn" onclick="showTab('recovery',this)">Recovery</button>
+    <button class="nav-btn" onclick="showTab('install',this)">📱 Install</button>
+  </nav>
+
+  <!-- CONTENT -->
+  <div class="content" id="main-content"></div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay hidden" id="modal" onclick="closeModal(event)">
+  <div class="modal-box" id="modal-box"></div>
+</div>
+
+<script>
+const IMAGES = {
+  "Band External Rotation": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/External_rotation_with_elastic_band.jpg/320px-External_rotation_with_elastic_band.jpg",
+  "Face Pull": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Face_pull_exercise.jpg/320px-Face_pull_exercise.jpg",
+  "Lat Pulldown": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Lat-pulldown.gif/240px-Lat-pulldown.gif",
+  "Seated Cable Row": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Seated-cable-row.gif/240px-Seated-cable-row.gif",
+  "EZ Bar Curl": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Barbell-curl.gif/240px-Barbell-curl.gif",
+  "Hammer Curl": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Hammer-curl.gif/240px-Hammer-curl.gif",
+  "Dead Bug": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Dead-bug.gif/240px-Dead-bug.gif",
+  "Plank": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Plank_position.jpg/320px-Plank_position.jpg",
+  "Stomach Vacuum": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Abdominal_vacuum.jpg/320px-Abdominal_vacuum.jpg",
+  "TKE": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Terminal_knee_extension.jpg/320px-Terminal_knee_extension.jpg",
+  "Goblet Squat": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Goblet-squat.gif/240px-Goblet-squat.gif",
+  "Bulgarian Split Squat": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Bulgarian-split-squat.gif/240px-Bulgarian-split-squat.gif",
+  "Romanian Deadlift": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Romanian-deadlift.gif/240px-Romanian-deadlift.gif",
+  "Leg Curl": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Lying-leg-curl.gif/240px-Lying-leg-curl.gif",
+  "Hip Thrust": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Hip-thrust.gif/240px-Hip-thrust.gif",
+  "Calf Raise": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Standing-calf-raise.gif/240px-Standing-calf-raise.gif",
+  "Hip Abduction": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Side-lying-hip-abduction.gif/240px-Side-lying-hip-abduction.gif",
+  "Lying Leg Raise": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Lying-leg-raise.gif/240px-Lying-leg-raise.gif",
+  "Incline DB Press": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Incline-dumbbell-press.gif/240px-Incline-dumbbell-press.gif",
+  "Flat DB Press": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Dumbbell-bench-press.gif/240px-Dumbbell-bench-press.gif",
+  "Cable Lateral Raise": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Lateral-raise.gif/240px-Lateral-raise.gif",
+  "Overhead Press": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Dumbbell-shoulder-press.gif/240px-Dumbbell-shoulder-press.gif",
+  "Tricep Pushdown": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Tricep-pushdown.gif/240px-Tricep-pushdown.gif",
+  "Overhead Tricep": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Overhead-tricep-extension.gif/240px-Overhead-tricep-extension.gif",
+  "Hanging Knee Raise": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Hanging-leg-raise.gif/240px-Hanging-leg-raise.gif",
+  "Cable Crunch": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Kneeling-cable-crunch.gif/240px-Kneeling-cable-crunch.gif",
+};
+
+const VACUUM_EX = {
+  name: "Stomach Vacuum", sets: 3, reps: "Hold 10–15 sec → work to 30 sec", weight: "Bodyweight", priority: true,
+  imageKey: "Stomach Vacuum",
+  note: "🔑 DAILY HABIT — deepest core layer (TVA). Natural corset for your lower belly. Do every day even on rest days.",
+  howTo: ["Stand, sit, or get on all fours (all fours is hardest/best)","Exhale ALL air from your lungs completely","Pull your belly button in toward your spine as hard as you can","Hold — breathe lightly in and out while keeping the brace","Release slowly. Rest 10 sec. Repeat.","Goal: work up to 3 sets of 30-second holds daily"],
+  ytSearch: "stomach vacuum exercise how to transverse abdominis"
+};
+
+const DAYS = [
+  {
+    id:"A", label:"DAY A", title:"Upper Pull + Rotator Cuff", subtitle:"Back · Biceps · Left Shoulder Rehab",
+    color:"#3b82f6", colorSoft:"rgba(59,130,246,0.12)",
+    cardio:{machine:"Spin Bike", duration:"10 min", intensity:"Zone 2 warm-up — easy conversational pace"},
+    exercises:[
+      {name:"Band External Rotation — Left Arm",sets:3,reps:"15–20",weight:"Band",priority:true,imageKey:"Band External Rotation",note:"🔑 Rotator cuff rehab. Elbow at 90°, slow & controlled. Zero pain.",howTo:["Attach band to rack at elbow height","Stand sideways, elbow bent 90° at your side","Rotate forearm outward away from body slowly","Return slowly — 3 sec each way","Left arm only for rehab"],ytSearch:"band external rotation rotator cuff exercise"},
+      {name:"Face Pull (Cable — High)",sets:3,reps:"15–20",weight:"Light",imageKey:"Face Pull",note:"Pull to forehead, elbows high. Protects both shoulders every session.",howTo:["Set cable to highest position, use rope attachment","Grip rope with thumbs facing you","Pull toward your face, elbows flaring OUT and HIGH","Squeeze shoulder blades at end, hold 1 sec","Control the return slowly"],ytSearch:"face pull cable exercise how to"},
+      {name:"Lat Pulldown (Cable)",sets:3,reps:"10–12",weight:"Moderate",imageKey:"Lat Pulldown",note:"Full stretch at top. Don't shrug. Try underhand grip for more bicep.",howTo:["Sit with thighs under pad, grip bar slightly wider than shoulders","Lean back slightly, chest up","Pull bar down to upper chest — think 'elbows to back pockets'","Stretch fully at top between reps","Don't let shoulders shrug up"],ytSearch:"lat pulldown proper form how to"},
+      {name:"Seated Cable Row",sets:3,reps:"10–12",weight:"Moderate",imageKey:"Seated Cable Row",note:"Chest up, squeeze at peak. Neutral spine throughout.",howTo:["Sit tall, feet on platform, slight knee bend","Grip handle, start with arms extended and back straight","Pull handle to your lower chest/belly","Squeeze shoulder blades together at peak","Slowly return — don't let your back round"],ytSearch:"seated cable row proper form"},
+      {name:"EZ Bar Curl",sets:3,reps:"10–12",weight:"Light-Mod",imageKey:"EZ Bar Curl",note:"Don't swing. Keep elbows fixed at sides.",howTo:["Grip EZ bar at angled section (easier on wrists)","Stand tall, elbows pinned to your sides","Curl up slowly — squeeze at top","Lower for 3 full seconds","NO swinging — if you swing, it's too heavy"],ytSearch:"EZ bar curl proper form bicep"},
+      {name:"Hammer Curl (DB)",sets:2,reps:"12",weight:"Light",imageKey:"Hammer Curl",note:"Neutral grip — great for brachialis thickness.",howTo:["Hold dumbbells at your sides, palms facing each other (like hammers)","Curl up keeping the neutral grip — don't rotate","Both arms alternating or together","Squeeze at top, slow on the way down"],ytSearch:"hammer curl dumbbell how to"},
+    ],
+    core:[
+      VACUUM_EX,
+      {name:"Dead Bug",sets:3,reps:"10 each side",imageKey:"Dead Bug",note:"🔑 Best lower belly move. Press lower back into floor the whole time.",howTo:["Lie on back, arms straight up, knees bent 90° in the air","Press lower back firmly into floor — keep it there the whole set","Slowly lower opposite arm + leg toward floor","Stop just before your back lifts — hold 1 sec","Return and switch sides"],ytSearch:"dead bug exercise core how to"},
+      {name:"Plank",sets:3,reps:"30–45 sec",imageKey:"Plank",note:"Brace hard, breathe into belly. Don't let hips sag or rise.",howTo:["Forearms on ground, elbows under shoulders","Body in a straight line from head to heels","Brace abs like you're about to get punched","Squeeze glutes — this protects the lower back","Breathe normally. Don't hold your breath."],ytSearch:"plank exercise proper form"},
+    ],
+    finisher:null,
+    notes:["BPC-157 + TB-500 are actively repairing your rotator cuff. Low weight, perfect form today.","Alpha GPC taken this morning sharpens mind-muscle connection — slow your reps down.","4L water today — Retatrutide clearance depends on it."]
+  },
+  {
+    id:"B", label:"DAY B", title:"Lower Body — ACL Safe", subtitle:"Left Quad Rebuild · Glutes · Hamstrings",
+    color:"#e8572a", colorSoft:"rgba(232,87,42,0.12)",
+    cardio:{machine:"Elliptical / Stepper", duration:"10 min", intensity:"Zone 2 — low impact, zero knee stress"},
+    exercises:[
+      {name:"Terminal Knee Extension — Left (TKE)",sets:3,reps:"20",weight:"Band",priority:true,imageKey:"TKE",note:"🔑 #1 ACL rehab move. VMO fires hard — this rebuilds your left quad.",howTo:["Loop band around back of LEFT knee, attach to rack in front","Stand facing rack, knee slightly bent","Straighten knee against band resistance — press forward to full extension","Squeeze quad hard at the top for 1 sec","Slowly bend knee back to start. LEFT LEG ONLY."],ytSearch:"terminal knee extension TKE ACL rehab exercise"},
+      {name:"Goblet Squat (DB)",sets:3,reps:"12–15",weight:"Light-Mod",imageKey:"Goblet Squat",note:"Hold DB at chest, squat to comfortable depth. ACL-safe — stop where the knee feels good.",howTo:["Hold one dumbbell vertically at your chest with both hands","Feet shoulder-width apart, toes slightly turned out","Push knees OUT as you squat down — don't let them cave in","Go to comfortable depth only — don't force range with the ACL","Drive through heels to stand, squeeze glutes at top"],ytSearch:"goblet squat dumbbell proper form"},
+      {name:"Bulgarian Split Squat — LEFT Leg Forward",sets:3,reps:"8–10",weight:"BW to start",priority:true,imageKey:"Bulgarian Split Squat",note:"🔑 Better than a leg press for your quad imbalance. Left leg does ALL the work. Right foot on Freak Athlete bench.",howTo:["Stand facing AWAY from your Freak Athlete bench","Place RIGHT foot up on the bench behind you, laces down","LEFT foot forward on the floor — about 2 feet from bench","Slowly lower your back knee toward the floor","Press through your LEFT heel to drive back up — feel the left quad fire","Start bodyweight only. Add DBs in each hand once comfortable."],ytSearch:"bulgarian split squat proper form beginners"},
+      {name:"Romanian Deadlift (DB)",sets:3,reps:"10–12",weight:"Moderate",imageKey:"Romanian Deadlift",note:"Hinge at hips, slight knee bend. Hamstrings + glutes. 100% ACL-safe.",howTo:["Hold dumbbells in front of thighs, slight knee bend","Push hips BACK — not down. This is a hinge not a squat","Lower weights along legs until you feel hamstring stretch","Drive hips forward to stand — squeeze glutes at top","Keep back flat the entire movement"],ytSearch:"romanian deadlift dumbbell proper form"},
+      {name:"Leg Curl (Freak Athlete Attachment)",sets:3,reps:"12–15",weight:"Light",imageKey:"Leg Curl",note:"Hamstring balance = ACL protection. Don't skip this.",howTo:["Lie face down on Freak Athlete bench, heels under roller pad","Curl heels toward your glutes — squeeze at top","Lower SLOWLY — 3-4 seconds down","Don't let hips rise off the bench","Both legs together"],ytSearch:"lying leg curl exercise hamstring"},
+      {name:"Hip Thrust (Barbell or DB)",sets:3,reps:"12–15",weight:"Moderate",imageKey:"Hip Thrust",note:"Drive through heels. Squeeze glutes hard at top.",howTo:["Sit on floor with upper back against bench edge","Place barbell or DB across hips (use a pad or towel)","Plant feet flat on floor, hip-width apart","Drive hips UP — squeeze glutes hard at top","Body forms a straight line from shoulders to knees at top"],ytSearch:"hip thrust exercise glutes proper form"},
+      {name:"Calf Raise (Standing)",sets:3,reps:"15–20",weight:"BW or light",imageKey:"Calf Raise",note:"Ankle stability is part of ACL recovery.",howTo:["Stand on edge of a step or flat floor","Rise up onto toes as high as possible","Pause at top 1 sec — really squeeze the calf","Lower slowly below the step if elevated","Both legs together"],ytSearch:"standing calf raise exercise how to"},
+    ],
+    core:[
+      VACUUM_EX,
+      {name:"Lying Leg Raise",sets:3,reps:"10–15",imageKey:"Lying Leg Raise",note:"Lower belly focus. Controlled descent — don't swing.",howTo:["Lie flat on back, hands under glutes for support","Keep legs straight (or slight knee bend)","Raise legs to 90° slowly","Lower them SLOWLY — stop just before they touch the floor","The lowering is where the lower belly works hardest"],ytSearch:"lying leg raise lower abs exercise"},
+      {name:"Side-Lying Hip Abduction",sets:3,reps:"15 each side",imageKey:"Hip Abduction",note:"Glute med — knee tracking + ACL stability.",howTo:["Lie on your side, body in straight line","Keep bottom leg straight, flex top foot","Raise top leg to about 45° — don't rotate hip forward","Pause at top, lower slowly","Do all reps one side then switch"],ytSearch:"side lying hip abduction glute med exercise"},
+    ],
+    finisher:{type:"Inversion Table", duration:"5–10 min", note:"Post-workout. Decompress spine, improve blood flow to recovering ACL joint."},
+    notes:["BPC-157 is accelerating connective tissue repair — the TKE and Bulgarian split squat are where you cash that in.","TRT + GH support means your left quad CAN and WILL catch up with consistent unilateral work.","If the knee feels wrong at any point, stop that exercise. Never push through ACL-adjacent pain."]
+  },
+  {
+    id:"C", label:"DAY C", title:"Upper Push + Core Burn", subtitle:"Chest · Shoulders · Triceps · Abs",
+    color:"#22c55e", colorSoft:"rgba(34,197,94,0.12)",
+    cardio:{machine:"Spin Bike", duration:"15 min", intensity:"Zone 2 → last 3 min at moderate effort"},
+    exercises:[
+      {name:"Band External Rotation — Left Arm (Warm-up)",sets:2,reps:"15",weight:"Band",priority:true,imageKey:"Band External Rotation",note:"🔑 Always open push days with this. Warms the cuff before any pressing.",howTo:["Same as Day A — elbow at 90°, rotate outward slowly","Warm-up today — 2 sets, light band, focus on feel","Left arm only"],ytSearch:"band external rotation rotator cuff warm up"},
+      {name:"Incline DB Press",sets:3,reps:"10–12",weight:"Moderate",imageKey:"Incline DB Press",note:"Upper chest focus. 3-sec lowering. Don't flare elbows wide.",howTo:["Set bench to 30–45° incline","Hold DBs at chest level, elbows at ~45° from body (not flared wide)","Press up and slightly together","Lower for 3 full seconds","Keep shoulder blades pinched back"],ytSearch:"incline dumbbell press chest proper form"},
+      {name:"Flat DB Press",sets:3,reps:"10–12",weight:"Moderate",imageKey:"Flat DB Press",note:"Keep left shoulder neutral. Stop if any impingement.",howTo:["Flat bench, feet on floor","DBs at chest level, slight bend in elbows at bottom","Press up — stop just short of locking out","Lower slowly — feel the chest stretch","Left shoulder: first sign of pain, stop"],ytSearch:"dumbbell bench press proper form"},
+      {name:"Cable Lateral Raise",sets:3,reps:"12–15",weight:"Light",imageKey:"Cable Lateral Raise",note:"Single arm cable = constant tension. Left arm lighter than right.",howTo:["Set cable to lowest position, use single D-handle","Stand sideways to cable, grip with far hand","Raise arm out to the side to shoulder height","Slow and controlled — don't swing","Left arm: use lighter weight than right for now"],ytSearch:"cable lateral raise single arm shoulder"},
+      {name:"Seated Overhead DB Press",sets:3,reps:"10–12",weight:"Light-Mod",imageKey:"Overhead Press",note:"Stop at ear level if left shoulder complains. Build range slowly.",howTo:["Sit on bench upright (or use back support)","Hold DBs at shoulder height, elbows at 90°","Press up — stop BEFORE you lock out","Lower slowly back to shoulder height","Left side: stop the set if shoulder pinches"],ytSearch:"seated dumbbell overhead press shoulder"},
+      {name:"Tricep Rope Pushdown (Cable)",sets:3,reps:"12–15",weight:"Moderate",imageKey:"Tricep Pushdown",note:"Full extension at bottom. Elbows tucked tight.",howTo:["Set cable high, attach rope","Grip rope ends, elbows pinned at sides","Push down and slightly out at bottom — full extension","Elbows must NOT move — only forearms","Slow controlled return"],ytSearch:"tricep rope pushdown cable exercise"},
+      {name:"Overhead Tricep Extension (Cable)",sets:2,reps:"12",weight:"Light",imageKey:"Overhead Tricep",note:"Long head stretch — great mass builder for the back of the arm.",howTo:["Set cable low, attach rope","Face away from cable, grip rope overhead","Start with elbows bent beside your head","Extend arms straight overhead — squeeze triceps","Lower slowly to feel the stretch"],ytSearch:"overhead tricep extension cable exercise"},
+    ],
+    core:[
+      VACUUM_EX,
+      {name:"Hanging Knee Raise (from Rack)",sets:3,reps:"10–15",imageKey:"Hanging Knee Raise",note:"🔑 Lower belly target. Curl the pelvis UP — don't just swing knees.",howTo:["Hang from pull-up bar on your rack","Start with a dead hang — no momentum","Curl knees UP and IN — think 'bring knees to chest'","Key: tilt your pelvis backward (posterior tilt) as you raise","Lower slowly — don't swing or drop"],ytSearch:"hanging knee raise lower abs proper form"},
+      {name:"Cable Crunch (Kneeling)",sets:3,reps:"15",imageKey:"Cable Crunch",note:"Keep hips stationary. Crunch with abs, not hip flexors.",howTo:["Kneel in front of high cable, rope attachment","Hold rope beside your head, elbows bent","Crunch DOWN — think 'bring elbows to knees'","Hips must not move — only your spine flexes","Hold the crunched position 1 sec, return slowly"],ytSearch:"kneeling cable crunch abs exercise"},
+      {name:"Dead Bug",sets:2,reps:"8 each side",imageKey:"Dead Bug",note:"Close out with deep core stabilization.",howTo:["Same as Day A — lower back pressed into floor","Arms up, knees bent 90°","Opposite arm and leg lower slowly","Stop before back lifts, return, switch sides"],ytSearch:"dead bug exercise core how to"},
+    ],
+    finisher:{type:"Spin Bike LISS", duration:"10–15 min post-workout", note:"Low intensity. Amplifies fat oxidation while Retatrutide is active. Conversational pace only."},
+    notes:["Highest calorie-burn day — push + cardio stacks perfectly with Retatrutide's fat mobilization window.","Creatine is protecting your muscle through appetite suppression. Dose it daily without fail.","Bad sleep last night? Drop weights 10–15% and focus on form. Never grind on empty."]
+  }
+];
+
+const WEEK = [
+  {day:"MON",workout:"Day A",label:"Upper Pull + Rotator Cuff + Vacuum",color:"#3b82f6"},
+  {day:"TUE",workout:"REST + Vacuum",label:"Zone 2 walk or easy spin (optional)",color:"#6b7280"},
+  {day:"WED",workout:"Day B",label:"Lower Body ACL Safe + Vacuum",color:"#e8572a"},
+  {day:"THU",workout:"REST + Vacuum",label:"Inversion table + walk",color:"#6b7280"},
+  {day:"FRI",workout:"Day C",label:"Upper Push + Core + Vacuum",color:"#22c55e"},
+  {day:"SAT",workout:"REST + Vacuum",label:"Cardio / Walk — read your body",color:"#f59e0b"},
+  {day:"SUN",workout:"REST + Vacuum",label:"Full rest. Sleep is training.",color:"#6b7280"},
+];
+
+let activeDay = 0;
+let checkedMap = JSON.parse(localStorage.getItem('checkedMap')||'{}');
+
+function saveChecked(){ localStorage.setItem('checkedMap', JSON.stringify(checkedMap)); }
+
+function ytURL(s){ return 'https://www.youtube.com/results?search_query='+encodeURIComponent(s+' exercise how to'); }
+
+function renderExercise(ex, prefix){
+  const key = prefix+'__'+ex.name;
+  const isDone = !!checkedMap[key];
+  return `<div class="ex-row${isDone?' done':''}" id="row-${CSS.escape(key)}">
+    <div class="ex-inner">
+      <div class="ex-check${isDone?' checked':''}" onclick="toggleCheck('${key.replace(/'/g,"\\'")}')">
+        ${isDone?'✓':''}
+      </div>
+      <div class="ex-body">
+        <div class="ex-name${ex.priority?' priority':''}${isDone?' done-text':''}">${ex.name}</div>
+        <div class="ex-tags">
+          ${ex.sets?`<span class="tag">${ex.sets} × ${ex.reps}</span>`:''}
+          ${ex.weight?`<span class="tag">${ex.weight}</span>`:''}
+        </div>
+        <div class="ex-note">${(ex.note||'').replace(/^🔑 /,'')}</div>
+      </div>
+      <button class="how-btn" onclick="openModal(${JSON.stringify(JSON.stringify(ex))})">HOW?</button>
+    </div>
+  </div>`;
+}
+
+function toggleCheck(key){
+  checkedMap[key] = !checkedMap[key];
+  saveChecked();
+  showTab('workout', document.querySelector('.nav-btn.active'));
+}
+
+function openModal(exJson){
+  const ex = JSON.parse(exJson);
+  const img = IMAGES[ex.imageKey];
+  let html = `<div class="modal-header">
+    <div class="modal-title">${ex.name}</div>
+    <button class="modal-close" onclick="document.getElementById('modal').classList.add('hidden')">Close</button>
+  </div>`;
+  if(img) html += `<img class="modal-img" src="${img}" alt="${ex.name}" onerror="this.style.display='none'">`;
+  html += `<a class="yt-link" href="${ytURL(ex.ytSearch||ex.youtubeSearch||ex.name)}" target="_blank">
+    <span class="yt-icon">▶</span>
+    <div><div class="yt-title">Watch Video Demo on YouTube</div><div class="yt-sub">Tap to see exactly how to perform this</div></div>
+  </a>
+  <div class="slabel">STEP BY STEP</div>`;
+  (ex.howTo||[]).forEach((s,i)=>{
+    html += `<div class="step-row"><div class="step-num">${i+1}</div><div class="step-text">${s}</div></div>`;
+  });
+  if(ex.note) html += `<div class="note-box">${ex.note}</div>`;
+  document.getElementById('modal-box').innerHTML = html;
+  document.getElementById('modal').classList.remove('hidden');
+}
+
+function closeModal(e){
+  if(e.target === document.getElementById('modal'))
+    document.getElementById('modal').classList.add('hidden');
+}
+
+function showTab(name, btn){
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  const c = document.getElementById('main-content');
+  
+  if(name==='workout'){
+    const d = DAYS[activeDay];
+    let html = `<div class="day-selector">`;
+    DAYS.forEach((day,i)=>{
+      const active = i===activeDay;
+      html += `<div class="day-btn" style="background:${active?day.colorSoft:'var(--card)'};border-color:${active?day.color:'var(--border)'};" onclick="selectDay(${i})">
+        <div class="day-label" style="color:${day.color}">${day.label}</div>
+        <div class="day-title">${day.title}</div>
+      </div>`;
+    });
+    html += `</div>`;
+    html += `<div class="cardio-box" style="background:${d.colorSoft};border:1px solid ${d.color}44">
+      <div class="slabel">CARDIO WARM-UP</div>
+      <div style="font-weight:600;font-size:14px">${d.cardio.machine} — ${d.cardio.duration}</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px">${d.cardio.intensity}</div>
+    </div>`;
+    html += `<div class="slabel">MAIN EXERCISES — tap checkbox to complete · tap HOW? for demo</div>`;
+    d.exercises.forEach(ex => { html += renderExercise(ex, d.id); });
+    html += `<div style="margin-top:14px"><div class="slabel">CORE + LOWER BELLY (incl. Daily Vacuum)</div>`;
+    d.core.forEach(ex => { html += renderExercise(ex, d.id+'_core'); });
+    html += `</div>`;
+    if(d.finisher){
+      html += `<div class="finisher-box">
+        <div class="slabel">FINISHER</div>
+        <div style="font-weight:600;font-size:14px">${d.finisher.type} — ${d.finisher.duration}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:3px">${d.finisher.note}</div>
+      </div>`;
+    }
+    html += `<div class="coach-box"><div class="slabel">COACH NOTES</div>`;
+    d.notes.forEach(n=>{
+      html += `<div class="coach-note border-left" style="border-left-color:${d.color}66">${n}</div>`;
+    });
+    html += `</div>`;
+    c.innerHTML = html;
+  }
+
+  else if(name==='vacuum'){
+    c.innerHTML = `
+      <div style="background:var(--purple-soft);border:1px solid rgba(168,85,247,0.3);border-radius:14px;padding:16px;margin-bottom:16px">
+        <div class="slabel" style="color:var(--purple)">STOMACH VACUUM — YOUR DAILY HABIT</div>
+        <div style="font-weight:700;font-size:16px;margin-bottom:8px">Daily Stomach Vacuum Practice</div>
+        <div style="font-size:13px;color:#d0d0d0;line-height:1.6">The transverse abdominis (TVA) is the deepest abdominal muscle — it wraps around your torso like a corset. Crunches don't reach it. Vacuums do. A strong TVA visually pulls the lower belly inward even at rest, and protects your spine.</div>
+      </div>
+      <a class="yt-link" href="https://www.youtube.com/results?search_query=stomach+vacuum+exercise+transverse+abdominis+lower+belly" target="_blank">
+        <span class="yt-icon">▶</span>
+        <div><div class="yt-title">Watch: How to do Stomach Vacuums</div><div class="yt-sub">YouTube — watch this first</div></div>
+      </a>
+      <div class="slabel">HOW TO DO IT — STEP BY STEP</div>
+      ${["Stand, sit, or get on all fours (all fours = hardest = best)","Exhale ALL air from your lungs — completely empty","Pull your belly button in toward your SPINE as hard as you can","Imagine someone is about to punch you and you're trying to make your belly disappear","Hold this contraction — breathe lightly in and out while keeping the brace","Release slowly. Rest 10 seconds. Repeat."].map((s,i)=>`<div class="vac-step"><div class="vac-num">${i+1}</div><div class="step-text">${s}</div></div>`).join('')}
+      <div style="margin-top:16px"><div class="slabel">3 POSITIONS (easiest → hardest)</div>
+        <div class="pos-card"><div class="pos-name">Easiest: Standing</div><div class="pos-desc">Stand tall, hands on thighs or hips. Best place to start.</div></div>
+        <div class="pos-card"><div class="pos-name">Medium: Seated</div><div class="pos-desc">Sit upright on bench or chair. Can do anywhere — car, couch, desk.</div></div>
+        <div class="pos-card"><div class="pos-name">Hardest: All Fours</div><div class="pos-desc">On hands and knees. Gravity pulls belly down — fighting it maximally activates the TVA. Gold standard.</div></div>
+      </div>
+      <div style="margin-top:16px"><div class="slabel">PROGRESSION OVER WEEKS</div>
+        ${[["Week 1–2","3 × 10-second holds","Just learn the movement. Getting belly button to spine is the skill."],["Week 3–4","3 × 20-second holds","Add a second hold. Build the endurance."],["Week 5+","3 × 30-second holds","Full contraction. You should feel real fatigue in the deep core."],["Advanced","5 × 30-second holds","Add this when 3 sets feel easy. Daily practice moves the needle."]].map(([w,t,n])=>`<div class="prog-row"><div class="prog-badge">${w}</div><div><div class="prog-title">${t}</div><div class="prog-note">${n}</div></div></div>`).join('')}
+      </div>
+      <div style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);border-radius:12px;padding:14px;margin-top:8px;font-size:13px;color:#d0d0d0;line-height:1.6">
+        💡 <strong style="color:var(--gold)">Pro tip:</strong> Do mini-holds throughout the day — in your car, at your desk, watching TV. The more frequent the stimulus the faster the TVA adapts.
+      </div>`;
+  }
+
+  else if(name==='schedule'){
+    c.innerHTML = `
+      <div class="slabel">WEEKLY STRUCTURE</div>
+      ${WEEK.map(d=>`<div class="week-row">
+        <div class="week-day">${d.day}</div>
+        <div class="week-dot" style="background:${d.color}"></div>
+        <div><div class="week-workout" style="color:${d.workout.includes('REST')?'var(--muted)':'var(--text)'}">${d.workout}</div><div class="week-label">${d.label}</div></div>
+      </div>`).join('')}
+      <div style="background:var(--purple-soft);border:1px solid rgba(168,85,247,0.3);border-radius:12px;padding:14px;margin-top:8px">
+        <div class="slabel" style="color:var(--purple)">VACUUM NOTE</div>
+        <div style="font-size:13px;color:#d0d0d0;line-height:1.6">Stomach vacuums appear every single day — workout and rest days alike. They take 5 minutes and can be done anywhere. This is the daily habit that directly attacks your lower belly pouch from the inside out.</div>
+      </div>
+      <div style="background:var(--accent-soft);border:1px solid rgba(232,87,42,0.3);border-radius:12px;padding:14px;margin-top:10px">
+        <div class="slabel" style="color:var(--accent)">PHASE PROGRESSION</div>
+        ${[["Weeks 1–4","3 days/week. Build the habit. Consistency beats intensity right now."],["Weeks 5–8","Add Day D if sleep + energy allows. Move to 4 days."],["Weeks 9+","Evaluate 5 days only after 4 days are locked and consistent."]].map(([p,d])=>`<div style="font-size:13px;color:#d0d0d0;margin-bottom:7px;line-height:1.5"><strong style="color:var(--text)">${p}:</strong> ${d}</div>`).join('')}
+      </div>`;
+  }
+
+  else if(name==='recovery'){
+    c.innerHTML = `
+      ${[["🔄","Inversion Table (Innova)","Post leg day, or any day back feels tight","Spinal decompression, joint space relief, circulation to healing ACL tissue."],["🚴","Spin Bike Zone 2","Off days — 20–30 min easy","Active recovery, fat burning without cortisol spike. Improves sleep."],["🏃","Elliptical Zone 2","Off days — low impact alternative","Full body movement without knee stress. Best ACL-friendly cardio option."]].map(([icon,name,when,ben])=>`<div class="rec-card"><div class="rec-head"><span class="rec-icon">${icon}</span><span class="rec-name">${name}</span></div><div class="rec-when">When: ${when}</div><div class="rec-benefit">${ben}</div></div>`).join('')}
+      <div class="info-block" style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.25)">
+        <div class="info-title slabel" style="color:var(--blue)">ACL + ROTATOR CUFF: RULES</div>
+        ${["Sharp pain = stop immediately. Dull ache = proceed carefully.","Left quad imbalance will take 8–16 weeks of consistent unilateral work to equalize.","BPC-157 + TB-500 need time. Don't rush back to heavy loads.","Rotator cuff: form always beats weight. Always.","Inversion table 3–4x per week minimum — use it."].map(t=>`<div class="info-line border-left" style="border-left-color:rgba(59,130,246,0.4)">${t}</div>`).join('')}
+      </div>
+      <div class="info-block" style="background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.25)">
+        <div class="info-title slabel" style="color:var(--green)">PROGRESS TRACKING</div>
+        ${[["📸 Photos","Every 2 weeks, same lighting + angle as your starting photos."],["📏 Waist","Weekly, first thing AM, around the navel."],["💪 Weights","Log your weights. Progressive overload matters even during fat loss."],["😴 Sleep","Note it before each session. We adjust based on how you slept."],["🎯 Vacuum","Track your hold time — going from 10 sec to 30 sec is real progress."]].map(([l,d])=>`<div class="info-line"><strong style="color:var(--text)">${l}:</strong> ${d}</div>`).join('')}
+      </div>`;
+  }
+
+  else if(name==='install'){
+    c.innerHTML = `
+      <div class="install-tip">
+        <strong>You're viewing this on iPhone — here's how to add it to your home screen:</strong><br><br>
+        1. Tap the <strong>Share button</strong> at the bottom of Safari (the box with an arrow pointing up) ↑<br><br>
+        2. Scroll down and tap <strong>"Add to Home Screen"</strong><br><br>
+        3. Tap <strong>"Add"</strong> in the top right<br><br>
+        It will appear on your home screen like an app. Tap it anytime — no internet needed, no Claude, no searching. It's yours.
+      </div>
+      <div class="card" style="margin-bottom:10px">
+        <div class="slabel">WHAT WORKS OFFLINE</div>
+        <div style="font-size:13px;color:#d0d0d0;line-height:1.7">
+          ✅ All 3 workout days with full exercise lists<br>
+          ✅ Checkbox tracking (remembers between visits)<br>
+          ✅ Step-by-step instructions for every exercise<br>
+          ✅ Stomach vacuum guide + progressions<br>
+          ✅ Weekly schedule + recovery tools<br>
+          ⚠️ Exercise images need internet to load<br>
+          ⚠️ YouTube video links need internet
+        </div>
+      </div>
+      <div class="card">
+        <div class="slabel">TIPS</div>
+        <div style="font-size:13px;color:#d0d0d0;line-height:1.7">
+          • Your checkbox progress is saved automatically<br>
+          • Come back to Claude to update the plan as you progress<br>
+          • Checkboxes reset if you clear Safari data — that's normal
+        </div>
+      </div>`;
+  }
+}
+
+function selectDay(i){
+  activeDay = i;
+  showTab('workout', document.querySelector('.nav-btn.active'));
+}
+
+// Init
+showTab('workout', document.querySelector('.nav-btn'));
+</script>
+</body>
+</html>
