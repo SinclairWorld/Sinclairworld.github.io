@@ -20,6 +20,10 @@
 }
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;overflow:hidden}
 .app{display:flex;flex-direction:column;height:100%;padding-top:var(--safe-top)}
+.home-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:rgba(255,255,255,0.03);border-bottom:1px solid var(--border);flex-shrink:0}
+.home-btn{display:flex;align-items:center;gap:6px;background:rgba(232,87,42,0.12);border:1px solid rgba(232,87,42,0.3);border-radius:8px;padding:6px 12px;color:var(--accent);font-family:'Barlow',sans-serif;font-weight:600;font-size:12px;text-decoration:none}
+.home-link{font-size:11px;color:var(--muted);text-decoration:none;padding:6px 10px;background:rgba(255,255,255,0.04);border-radius:8px;border:1px solid var(--border)}
+.home-links{display:flex;gap:8px}
 .header{padding:16px 20px 12px;border-bottom:1px solid var(--border);flex-shrink:0}
 .eyebrow{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:3px;color:var(--accent);margin-bottom:2px}
 .title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:24px;line-height:1}
@@ -80,6 +84,13 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Barlow
 </head>
 <body>
 <div class="app">
+<div class="home-bar">
+    <a href="index.html" class="home-btn">⌂ Home</a>
+    <div class="home-links">
+      <a href="troy-workout.html" class="home-link">🏋️ Workout</a>
+      <a href="supplement-protocol.html" class="home-link">💊 Protocol</a>
+    </div>
+  </div>
   <div class="header">
     <div class="eyebrow">SINCLAIR PERFORMANCE</div>
     <div class="title">SCHEDULE &<br><span>INJECTION CALENDAR</span></div>

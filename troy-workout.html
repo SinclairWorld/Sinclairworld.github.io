@@ -23,6 +23,10 @@
   }
   html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Barlow', sans-serif; overflow: hidden; }
   .app { display: flex; flex-direction: column; height: 100%; padding-top: var(--safe-top); }
+  .home-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .home-btn { display: flex; align-items: center; gap: 6px; background: rgba(232,87,42,0.12); border: 1px solid rgba(232,87,42,0.3); border-radius: 8px; padding: 6px 12px; color: var(--accent); font-family: 'Barlow', sans-serif; font-weight: 600; font-size: 12px; text-decoration: none; }
+  .home-links { display: flex; gap: 8px; }
+  .home-link { font-size: 11px; color: var(--muted); text-decoration: none; padding: 6px 10px; background: rgba(255,255,255,0.04); border-radius: 8px; border: 1px solid var(--border); }
   .header { padding: 20px 20px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
   .header-eyebrow { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 3px; color: var(--accent); margin-bottom: 4px; }
   .header-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 26px; line-height: 1; margin-bottom: 4px; }
@@ -104,6 +108,13 @@
 <body>
 <div class="app">
   <!-- HEADER -->
+<div class="home-bar">
+    <a href="index.html" class="home-btn">⌂ Home</a>
+    <div class="home-links">
+      <a href="supplement-protocol.html" class="home-link">💊 Protocol</a>
+      <a href="calendar.html" class="home-link">📅 Calendar</a>
+    </div>
+  </div>
   <div class="header">
     <div class="header-eyebrow">PHASE 1 · WEEKS 1–4 · 3 DAYS/WEEK</div>
     <h1 class="header-title">YOUR TRAINING<br><span>PROTOCOL</span></h1>
