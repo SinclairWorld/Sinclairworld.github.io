@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="My Protocol">
+<title>Sinclair Protocol</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0f;--card:#111118;--border:#1e1e2e;
+  --accent:#e8572a;--blue:#3b82f6;--green:#22c55e;
+  --gold:#f59e0b;--purple:#a855f7;--red:#ef4444;
+  --teal:#14b8a6;--text:#f0f0f0;--muted:#6b7280;
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;overflow:hidden}
+.app{display:flex;flex-direction:column;height:100%;padding-top:var(--safe-top)}
+.header{padding:18px 20px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
+.eyebrow{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:3px;color:var(--accent);margin-bottom:4px}
+.title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:24px;line-height:1;margin-bottom:4px}
+.title span{color:var(--accent)}
+.subtitle{font-size:12px;color:var(--muted)}
+.nav{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav-btn{background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);font-family:'Barlow',sans-serif;font-weight:600;font-size:12px;padding:12px 14px 10px;cursor:pointer;white-space:nowrap;transition:all 0.15s;flex-shrink:0}
+.nav-btn.active{color:var(--text);border-bottom-color:var(--accent)}
+.content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px;padding-bottom:calc(20px + var(--safe-bottom))}
+.slabel{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;color:var(--muted);margin-bottom:10px;margin-top:4px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px}
+.section-header{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:2px;font-weight:700;padding:10px 14px;border-radius:10px;margin-bottom:8px;margin-top:16px}
+
+/* Supplement rows */
+.supp-row{background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:8px;overflow:hidden}
+.supp-header{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer}
+.supp-check{min-width:22px;height:22px;border-radius:6px;border:2px solid var(--muted);background:transparent;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;flex-shrink:0;transition:all 0.2s}
+.supp-check.checked{border-color:var(--green);background:var(--green)}
+.supp-info{flex:1;min-width:0}
+.supp-name{font-weight:600;font-size:14px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.supp-name.priority{color:var(--gold)}
+.supp-dose{font-size:12px;color:var(--muted);margin-top:2px}
+.supp-badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;white-space:nowrap;flex-shrink:0}
+.expand-btn{background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:8px;padding:4px 10px;cursor:pointer;font-size:11px;color:var(--muted);flex-shrink:0;font-family:'Barlow',sans-serif;font-weight:600}
+.supp-detail{padding:0 14px 14px;border-top:1px solid var(--border);margin-top:0;display:none}
+.supp-detail.open{display:block}
+.detail-row{display:flex;justify-content:space-between;align-items:flex-start;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px}
+.detail-row:last-child{border-bottom:none}
+.detail-label{color:var(--muted);flex-shrink:0;margin-right:10px;min-width:80px}
+.detail-value{color:var(--text);text-align:right;line-height:1.4}
+.recon-box{background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);border-radius:10px;padding:10px 12px;margin-top:10px}
+.recon-title{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;color:var(--blue);margin-bottom:6px}
+.recon-row{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px}
+.recon-key{color:var(--muted)}
+.recon-val{color:var(--text);font-weight:600}
+.combine-box{background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.25);border-radius:10px;padding:8px 12px;margin-top:8px;font-size:12px;color:#86efac}
+.warn-box{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:10px;padding:8px 12px;margin-top:8px;font-size:12px;color:#fca5a5}
+.note-box{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:10px;padding:8px 12px;margin-top:8px;font-size:12px;color:#fcd34d;line-height:1.5}
+
+/* Edit modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:1000;display:flex;align-items:flex-end;justify-content:center}
+.modal-overlay.hidden{display:none}
+.modal-box{background:var(--card);border:1px solid var(--border);border-radius:20px 20px 0 0;padding:24px 20px;padding-bottom:calc(40px + var(--safe-bottom));width:100%;max-width:500px;max-height:85vh;overflow-y:auto}
+.modal-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:18px;margin-bottom:16px}
+.field-label{font-size:12px;color:var(--muted);margin-bottom:4px;margin-top:12px}
+.field-input{width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'Barlow',sans-serif;font-size:14px}
+.field-input:focus{outline:none;border-color:var(--accent)}
+.modal-btns{display:flex;gap:10px;margin-top:20px}
+.btn-save{flex:1;background:var(--accent);border:none;border-radius:10px;padding:12px;color:#fff;font-family:'Barlow',sans-serif;font-weight:700;font-size:14px;cursor:pointer}
+.btn-cancel{flex:1;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:10px;padding:12px;color:var(--text);font-family:'Barlow',sans-serif;font-weight:600;font-size:14px;cursor:pointer}
+
+/* Injection map */
+.inject-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px}
+.inject-time{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;margin-bottom:8px}
+.inject-combo{display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(255,255,255,0.03);border-radius:8px;margin-bottom:6px}
+.inject-icon{font-size:16px;flex-shrink:0}
+.inject-text{font-size:13px;color:var(--text);flex:1}
+.inject-units{font-size:12px;color:var(--green);font-weight:700;white-space:nowrap}
+
+/* Cycle tracker */
+.cycle-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px}
+.cycle-name{font-weight:600;font-size:15px;margin-bottom:4px}
+.cycle-sub{font-size:12px;color:var(--muted);margin-bottom:10px}
+.cycle-bar{height:8px;background:rgba(255,255,255,0.08);border-radius:4px;margin-bottom:6px;overflow:hidden}
+.cycle-fill{height:100%;border-radius:4px;transition:width 0.3s}
+.cycle-info{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+.cycle-btns{display:flex;gap:8px;margin-top:10px}
+.cycle-btn{flex:1;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;padding:8px;color:var(--text);font-family:'Barlow',sans-serif;font-size:12px;font-weight:600;cursor:pointer}
+.cycle-btn.primary{background:var(--accent);border-color:var(--accent)}
+
+/* Order list */
+.order-item{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:8px}
+.order-num{min-width:28px;height:28px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+.order-info{flex:1}
+.order-name{font-weight:600;font-size:14px;margin-bottom:3px}
+.order-detail{font-size:12px;color:var(--muted);line-height:1.5}
+.order-qty{font-size:12px;color:var(--gold);font-weight:700;margin-top:3px}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="eyebrow">SINCLAIR PERFORMANCE PROTOCOL</div>
+    <h1 class="title">SUPPLEMENT<br><span>COMMAND CENTER</span></h1>
+    <div class="subtitle">Tap any supplement to expand · Tap ✏️ to edit dose · Track cycles</div>
+  </div>
+  <nav class="nav">
+    <button class="nav-btn active" onclick="showTab('daily',this)">Daily Doses</button>
+    <button class="nav-btn" onclick="showTab('injections',this)">Injections</button>
+    <button class="nav-btn" onclick="showTab('cycles',this)">Cycles</button>
+    <button class="nav-btn" onclick="showTab('recon',this)">Reconstitution</button>
+    <button class="nav-btn" onclick="showTab('order',this)">Order List</button>
+  </nav>
+  <div class="content" id="main-content"></div>
+</div>
+
+<div class="modal-overlay hidden" id="modal" onclick="closeModalOut(event)">
+  <div class="modal-box" id="modal-box"></div>
+</div>
+
+<script>
+const STORAGE_KEY = 'sinclair_protocol_v2';
+
+function loadData() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch(e) { return {}; }
+}
+function saveData(d) { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
+
+const SUPPS = [
+  // INJECTIONS
+  {id:'gh',name:'Growth Hormone (Arctotropin)',category:'injection',time:'Morning',priority:true,
+   dose:'2 IU (20 units)',route:'SubQ',frequency:'Daily',
+   purpose:'Fat mobilization, tissue repair, recovery, body recomposition',
+   cycle:'19-week cycle: Wk1 20 units, Wk2-5 40 units, Wk6-19 50 units',
+   combineWith:'Solo only — do not combine',
+   recon:{vial:'Per vial label',water:'1mL bacteriostatic',conc:'10 IU/mL',dose:'2IU = 20 units',shelf:'Use within 28 days refrigerated'},
+   warning:'Inject first thing AM. Morning light exposure after to clear Gabapentin grogginess.',
+   color:'#f59e0b'},
+
+  {id:'retatrutide',name:'Retatrutide (GLP-3)',category:'injection',time:'Weekly — Monday AM',priority:true,
+   dose:'3mg → titrating to 5mg',route:'SubQ',frequency:'Once weekly',
+   purpose:'Triple GLP-1/GIP/glucagon agonist — aggressive fat loss + blood sugar control',
+   cycle:'Continuous until target 15% body fat',
+   combineWith:'Can combine with Semaglutide in same syringe',
+   recon:{vial:'30mg',water:'1.5mL bacteriostatic',conc:'20mg/mL',dose:'3mg=15 units · 4mg=20 units · 5mg=25 units',shelf:'6-8 weeks refrigerated'},
+   warning:'Force protein intake — appetite suppression is aggressive. Minimum 4L water daily.',
+   color:'#e8572a'},
+
+  {id:'sema',name:'Semaglutide',category:'injection',time:'Weekly — Monday AM',priority:false,
+   dose:'0.25mg (5 units)',route:'SubQ',frequency:'Once weekly',
+   purpose:'Blood sugar adjunct alongside Retatrutide — addresses glucose not fully controlled by GLP-3',
+   cycle:'Continuous — reassess with bloodwork',
+   combineWith:'Combine with Retatrutide in same syringe — same needle, same time',
+   recon:{vial:'5mg',water:'1mL bacteriostatic',conc:'5mg/mL',dose:'0.25mg = 5 units',shelf:'8 weeks refrigerated'},
+   warning:'At 0.25mg this is a gentle adjunct dose — monitor blood glucose monthly.',
+   color:'#3b82f6'},
+
+  {id:'testE',name:'Testosterone Enanthate',category:'injection',time:'Every 2 weeks — alternating with Cyp',priority:true,
+   dose:'1mL (as prescribed)',route:'IM — intramuscular',frequency:'Every 2 weeks',
+   purpose:'TRT — muscle preservation, recovery, libido, mood, fat loss synergy',
+   cycle:'Continuous TRT — doctor administered',
+   combineWith:'NEVER combine with other compounds — oil based',
+   recon:{vial:'Prescribed vial',water:'N/A — pre-mixed oil',conc:'Per prescription',dose:'1mL as prescribed',shelf:'Per expiry'},
+   warning:'IM injection — glute or quad. Rotate sites. Take Anastrozole 0.5mg same day.',
+   color:'#a855f7'},
+
+  {id:'testC',name:'Testosterone Cypionate',category:'injection',time:'Alternate weeks from Enanthate',priority:false,
+   dose:'100mg (0.5mL = 50 units)',route:'SubQ',frequency:'Every 2 weeks alternating',
+   purpose:'TRT bridge — maintains stable testosterone levels between Enanthate doses',
+   cycle:'Continuous — self-administered on off weeks',
+   combineWith:'NEVER combine — oil based',
+   recon:{vial:'Prescribed',water:'N/A — pre-mixed oil',conc:'200mg/mL typical',dose:'100mg = 0.5mL = 50 units',shelf:'Per expiry'},
+   warning:'SubQ for Cypionate. Alternate injection sites. Anastrozole 0.5mg same day.',
+   color:'#8b5cf6'},
+
+  {id:'klow',name:'KLOW / REGEN (BPC-157 + TB-500 + GHK-cu + KPV)',category:'injection',time:'Morning',priority:true,
+   dose:'250mcg (6 units)',route:'SubQ',frequency:'Daily — 6-8 weeks on / 4 weeks off',
+   purpose:'ACL repair, rotator cuff healing, connective tissue, anti-inflammatory, skin repair',
+   cycle:'6-8 weeks ON → 4 weeks OFF → repeat',
+   combineWith:'Combine with MitoStack in same syringe — 11 units total',
+   recon:{vial:'80mg (KLOW) or 20mg (REGEN)',water:'2mL bacteriostatic',conc:'40mg/mL (KLOW) · 10mg/mL (REGEN)',dose:'250mcg = 6 units',shelf:'4-6 weeks refrigerated'},
+   warning:'Current vial: REGEN 20mg. Next order: upgrade to KLOW 80mg for GHK-cu + KPV.',
+   color:'#22c55e'},
+
+  {id:'mitostack',name:'MitoStack (MOTS-C + 5-amino-1MQ + NAD+)',category:'injection',time:'Morning',priority:true,
+   dose:'300mcg (5 units)',route:'SubQ',frequency:'Daily',
+   purpose:'Mitochondrial fat burning, insulin sensitivity, cellular energy, metabolic optimization',
+   cycle:'Continuous daily use',
+   combineWith:'Combine with KLOW/REGEN in same syringe — 11 units total',
+   recon:{vial:'120mg',water:'2mL bacteriostatic',conc:'60mg/mL',dose:'300mcg = 5 units',shelf:'4-6 weeks refrigerated'},
+   warning:'ORDER PENDING — not yet in fridge. Add to next VPeptide order.',
+   color:'#14b8a6'},
+
+  {id:'dsip',name:'DSIP (Delta Sleep Inducing Peptide)',category:'injection',time:'Night — 30 min before bed',priority:false,
+   dose:'100-200mcg (1-2 units)',route:'SubQ',frequency:'As needed — not every night',
+   purpose:'Deep sleep architecture — promotes delta wave sleep, complements Epithalon',
+   cycle:'Use on difficult sleep nights — not daily',
+   combineWith:'Combine with Epithalon in same syringe at night',
+   recon:{vial:'10mg',water:'0.5mL ONLY (half vial at a time)',conc:'20mg/mL',dose:'200mcg = 1 unit',shelf:'MAX 2 weeks — reconstitute half at a time'},
+   warning:'Degrades quickly — never reconstitute full vial at once. Do 0.5mL, use 2 weeks, then reconstitute second half.',
+   color:'#6366f1'},
+
+  {id:'epithalon',name:'N-Acetyl Epithalon',category:'injection',time:'Night — before bed',priority:true,
+   dose:'10mg (25 units × 2 draws)',route:'SubQ',frequency:'Daily for 10-20 days then STOP',
+   purpose:'Pineal gland restoration, melatonin production, circadian rhythm reset, Zopiclone taper support',
+   cycle:'10-20 days ON → 3-6 months OFF → repeat. Split 20mg vial into 2 separate cycles.',
+   combineWith:'Combine with DSIP in same syringe — 26 units total (split into 2×13)',
+   recon:{vial:'20mg — reconstitute HALF at a time',water:'0.5mL per half = 10mg per reconstitution',conc:'20mg/mL',dose:'10mg = 50 units — split into 2 injections of 25 units each at different sites',shelf:'3-4 weeks refrigerated per half'},
+   warning:'ORDER PENDING. Split 20mg vial: reconstitute 10mg now (0.5mL water), save dry half for next cycle.',
+   color:'#a855f7'},
+
+  {id:'anastrozole',name:'Anastrozole (Arimidex)',category:'oral',time:'Testosterone injection days only',priority:false,
+   dose:'0.5mg',route:'Oral tablet',frequency:'On testosterone injection days only',
+   purpose:'Estrogen control — prevents aromatization of testosterone',
+   cycle:'Only on injection days — do not take daily',
+   combineWith:'Oral — take with or without food',
+   recon:{vial:'N/A',water:'N/A',conc:'N/A',dose:'0.5mg tablet',shelf:'Per expiry'},
+   warning:'Do NOT take daily. Only on Test injection days. Too much AI kills libido, mood, and joint health.',
+   color:'#ef4444'},
+
+  // ORAL DAILY
+  {id:'alphaGPC',name:'Alpha GPC',category:'oral',time:'Morning — 60-90 min before training',priority:false,
+   dose:'1 capsule',route:'Oral',frequency:'Daily (training days especially)',
+   purpose:'Cognitive edge, mind-muscle connection, acetylcholine support for heavy training',
+   cycle:'12 weeks ON / 4 weeks OFF',
+   combineWith:'Take with morning stack',
+   recon:{vial:'N/A',water:'N/A',conc:'N/A',dose:'1 capsule',shelf:'Per expiry'},
+   warning:'',color:'#f59e0b'},
+
+  {id:'creatine',name:'Creatine Monohydrate',category:'oral',time:'Morning',priority:true,
+   dose:'5g',route:'Oral',frequency:'Daily — never skip',
+   purpose:'Muscle preservation during Retatrutide appetite suppression — critical compound',
+   cycle:'Indefinite daily use',
+   combineWith:'Mix in water or shake',
+   recon:{vial:'N/A',water:'N/A',conc:'N/A',dose:'5g',shelf:'Per expiry'},
+   warning:'Never skip this. Retatrutide kills appetite — creatine protects muscle mass.',
+   color:'#22c55e'},
+
+  {id:'sulforaphane',name:'Sulforaphane',category:'oral',time:'Morning with food',priority:false,
+   dose:'1 capsule',route:'Oral',frequency:'Daily',
+   purpose:'Antioxidant, cellular health, anti-inflammatory, cancer prevention',
+   cycle:'Indefinite',
+   combineWith:'Take with Fish Oil',
+   recon:{vial:'N/A',water:'N/A',conc:'N/A',dose:'1 capsule',shelf:'Per expiry'},
+   warning:'',color:'#14b8a6'},
+
+  {id:'fishOil',name:'Fish Oil + CoQ10',category:'oral',time:'Morning with food',priority:false,
+   dose:'Fish Oil 1250mg + CoQ10 300mg',route:'Oral',frequency:'Daily',
+   purpose:'Cardiovascular support, mitochondrial function, lipid management — important with Atorvastatin',
+   cycle:'Indefinite',
+   combineWith:'Take together with Sulforaphane',
+   recon:{vial:'N/A',water:'N/A',conc:'N/A',dose:'As labeled',shelf:'Per expiry'},
+   warning:'CoQ10 is especially important when on Atorvastatin — statins deplete CoQ10.',
+   color:'#3b82f6'},
+
+  {id:'atorvastatin',name:'Atorvastatin',category:'oral',time:'Morning',priority:false,
+   dose:'As prescribed',route:'Oral',frequency:'Daily',
+   purpose:'Cholesterol management — important with GH which can elevate lipids',
+   cycle:'Indefinite — prescribed',
+   combineWith:'Take with CoQ10 always',
+   recon:{vial:'N/A',water:'N/A',conc:'N/A',dose:'As prescribed',shelf:'Per expiry'},
+   warning:'Always pair with CoQ10 — statins deplete it. Monitor liver enzymes with doctor.',
+   color:'#ef4444'},
+
+  {id:'cytomel',name:'Cytomel (T3) — Liothyronine',category:'oral',time:'Morning — away from other meds',priority:false,
+   dose:'12.5mcg (half tablet) — possible increase to 25mcg',route:'Oral',frequency:'Daily',
+   purpose:'Thyroid support, metabolic rate, fat loss acceleration',
+   cycle:'Continuous — reassess with bloodwork',
+   combineWith:'Take alone — 30 min away from other medications',
+   recon:{vial:'N/A',water:'N/A',conc:'N/A',dose:'12.5mcg — do not increase without bloodwork',shelf:'Per expiry'},
+   warning:'Do NOT increase to 25mcg without free T3 bloodwork. On Retatrutide + T3 excess = muscle loss risk.',
+   color:'#f59e0b'},
+
+  {id:'bupropion',name:'Bupropion',category:'oral',time:'Morning',priority:false,
+   dose:'200mg',route:'Oral',frequency:'Daily',
+   purpose:'Prescribed baseline — mood, focus, mild dopaminergic support',
+   cycle:'Indefinite — prescribed',
+   combineWith:'Morning stack',
+   recon:{vial:'N/A',water:'N/A',conc:'N/A',dose:'200mg as prescribed',shelf:'Per expiry'},
+   warning:'',color:'#6b7280'},
+
+  {id:'semax',name:'Semax Nasal',category:'nasal',time:'Morning — before active work window',priority:false,
+   dose:'120mcg (1 spray each nostril)',route:'Intranasal',frequency:'Daily',
+   purpose:'Cognitive enhancement, BDNF support, focus and memory',
+   cycle:'4-6 weeks ON / 2 weeks OFF',
+   combineWith:'Nasal — use before Selank',
+   recon:{vial:'N/A',water:'N/A',conc:'N/A',dose:'1 spray each nostril',shelf:'Refrigerate'},
+   warning:'',color:'#6366f1'},
+
+  {id:'selank',name:'Selank Nasal',category:'nasal',time:'3PM — patience buffer',priority:false,
+   dose:'120-240mcg (1-2 sprays each nostril)',route:'Intranasal',frequency:'Daily',
+   purpose:'Anxiolytic, emotional regulation, sustained patience — family/social transition',
+   cycle:'4-6 weeks ON / 2 weeks OFF',
+   combineWith:'Nasal use only',
+   recon:{vial:'N/A',water:'N/A',conc:'N/A',dose:'1-2 sprays each nostril',shelf:'Refrigerate'},
+   warning:'',color:'#8b5cf6'},
+
+  // NIGHT STACK
+  {id:'magGly',name:'Magnesium Glycinate',category:'oral',time:'8PM — night stack',priority:true,
+   dose:'300mg',route:'Oral',frequency:'Daily',
+   purpose:'Deep muscular relaxation, sleep architecture, autonomic nervous system recovery',
+   cycle:'Indefinite',
+   combineWith:'Take with L-Theanine and Gabapentin',
+   recon:{vial:'N/A',water:'N/A',conc:'N/A',dose:'300mg',shelf:'Per expiry'},
+   warning:'',color:'#6366f1'},
+
+  {id:'ltheanine',name:'L-Theanine',category:'oral',time:'8PM — night stack',priority:false,
+   dose:'200mg',route:'Oral',frequency:'Daily',
+   purpose:'Quiets thought loops, eases sleep entry, complements Magnesium',
+   cycle:'Indefinite',
+   combineWith:'Night stack with Magnesium',
+   recon:{vial:'N/A',water:'N/A',conc:'N/A',dose:'200mg',shelf:'Per expiry'},
+   warning:'📵 Phone in another room by 9PM — screen light kills this entire stack.',
+   color:'#6366f1'},
+
+  {id:'gabapentin',name:'Gabapentin',category:'oral',time:'8PM — night stack',priority:false,
+   dose:'As prescribed',route:'Oral',frequency:'Daily',
+   purpose:'CNS down-regulation — primary sleep brake',
+   cycle:'Prescribed — do not stop suddenly',
+   combineWith:'Night stack',
+   recon:{vial:'N/A',water:'N/A',conc:'N/A',dose:'As prescribed',shelf:'Per expiry'},
+   warning:'Morning grogginess is a known side effect. Get outside immediately upon waking — natural light clears it fastest.',
+   color:'#6b7280'},
+
+  {id:'zopiclone',name:'Zopiclone',category:'oral',time:'As needed — working toward elimination',priority:false,
+   dose:'As prescribed — taper goal',route:'Oral',frequency:'Working toward tapering off',
+   purpose:'Current sleep aid — goal is to replace with Epithalon + DSIP + night stack',
+   cycle:'TAPER with doctor supervision — do NOT stop cold turkey',
+   combineWith:'Never combine with alcohol',
+   recon:{vial:'N/A',water:'N/A',conc:'N/A',dose:'As prescribed — reduce gradually',shelf:'Per expiry'},
+   warning:'Do not stop suddenly — taper only under medical supervision. Epithalon cycle should help reduce dependency.',
+   color:'#ef4444'},
+];
+
+const CYCLES = [
+  {id:'ret',name:'Retatrutide',color:'#e8572a',total:null,unit:'Continuous',note:'Until 15% body fat target',startKey:'ret_start'},
+  {id:'bpc',name:'KLOW / BPC-157 + TB-500',color:'#22c55e',total:56,unit:'days',note:'6-8 weeks ON → 4 weeks OFF',startKey:'bpc_start'},
+  {id:'epi',name:'N-Acetyl Epithalon',color:'#a855f7',total:15,unit:'days',note:'10-20 days then 3-6 month break',startKey:'epi_start'},
+  {id:'gh',name:'Growth Hormone',color:'#f59e0b',total:133,unit:'days',note:'19-week cycle — currently active',startKey:'gh_start'},
+  {id:'alphaGPC2',name:'Alpha GPC',color:'#f59e0b',total:84,unit:'days',note:'12 weeks ON / 4 weeks OFF',startKey:'agpc_start'},
+];
+
+let data = loadData();
+
+function save(){saveData(data);}
+
+function toggleCheck(id){
+  const today = new Date().toDateString();
+  if(!data.checks) data.checks={};
+  const key = id+'_'+today;
+  data.checks[key] = !data.checks[key];
+  save();
+  renderCurrentTab();
+}
+
+function isChecked(id){
+  const today = new Date().toDateString();
+  if(!data.checks) return false;
+  return !!data.checks[id+'_'+today];
+}
+
+function toggleDetail(id){
+  const el = document.getElementById('detail_'+id);
+  if(el) el.classList.toggle('open');
+}
+
+function openEdit(id){
+  const s = SUPPS.find(x=>x.id===id);
+  if(!s) return;
+  const custom = (data.custom||{})[id]||{};
+  document.getElementById('modal-box').innerHTML = `
+    <div class="modal-title">✏️ Edit: ${s.name}</div>
+    <div class="field-label">CURRENT DOSE</div>
+    <input class="field-input" id="edit_dose" value="${custom.dose||s.dose}" placeholder="e.g. 250mcg">
+    <div class="field-label">FREQUENCY / TIMING</div>
+    <input class="field-input" id="edit_freq" value="${custom.freq||s.frequency}" placeholder="e.g. Daily AM">
+    <div class="field-label">YOUR NOTES</div>
+    <input class="field-input" id="edit_note" value="${custom.note||''}" placeholder="Personal notes...">
+    <div class="field-label">STATUS</div>
+    <select class="field-input" id="edit_status">
+      <option value="active" ${(custom.status||'active')==='active'?'selected':''}>Active — currently using</option>
+      <option value="pending" ${custom.status==='pending'?'selected':''}>Pending — ordered, not started</option>
+      <option value="paused" ${custom.status==='paused'?'selected':''}>Paused — on hold</option>
+      <option value="off" ${custom.status==='off'?'selected':''}>Off cycle</option>
+    </select>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" onclick="saveEdit('${id}')">Save Changes</button>
+    </div>`;
+  document.getElementById('modal').classList.remove('hidden');
+}
+
+function saveEdit(id){
+  if(!data.custom) data.custom={};
+  data.custom[id]={
+    dose: document.getElementById('edit_dose').value,
+    freq: document.getElementById('edit_freq').value,
+    note: document.getElementById('edit_note').value,
+    status: document.getElementById('edit_status').value,
+  };
+  save();
+  closeModal();
+  renderCurrentTab();
+}
+
+function closeModal(){document.getElementById('modal').classList.add('hidden');}
+function closeModalOut(e){if(e.target===document.getElementById('modal'))closeModal();}
+
+const TIME_ORDER = ['Morning','Weekly — Monday AM','Alternate weeks from Enanthate','Every 2 weeks — alternating with Cyp','3PM — patience buffer','8PM — night stack','Night — 30 min before bed','Night — before bed','As needed — working toward elimination'];
+
+function renderSupp(s){
+  const custom = (data.custom||{})[s.id]||{};
+  const checked = isChecked(s.id);
+  const status = custom.status||'active';
+  const statusColors = {active:'var(--green)',pending:'var(--gold)',paused:'var(--muted)',off:'var(--muted)'};
+  const dose = custom.dose||s.dose;
+  const freq = custom.freq||s.frequency;
+  const note = custom.note||'';
+
+  return `<div class="supp-row" style="border-left:3px solid ${s.color}">
+    <div class="supp-header">
+      <div class="supp-check${checked?' checked':''}" onclick="toggleCheck('${s.id}')">${checked?'✓':''}</div>
+      <div class="supp-info">
+        <div class="supp-name${s.priority?' priority':''}" style="${checked?'text-decoration:line-through;opacity:0.5':''}">${s.name}</div>
+        <div class="supp-dose">${dose} · ${freq}</div>
+        ${note?`<div class="supp-dose" style="color:var(--gold)">${note}</div>`:''}
+      </div>
+      <span class="supp-badge" style="background:${statusColors[status]}22;color:${statusColors[status]}">${status.toUpperCase()}</span>
+      <button class="expand-btn" onclick="toggleDetail('${s.id}')">INFO</button>
+      <button class="expand-btn" style="color:var(--accent)" onclick="openEdit('${s.id}')">✏️</button>
+    </div>
+    <div class="supp-detail" id="detail_${s.id}">
+      <div class="detail-row"><span class="detail-label">Purpose</span><span class="detail-value">${s.purpose}</span></div>
+      <div class="detail-row"><span class="detail-label">Route</span><span class="detail-value">${s.route}</span></div>
+      <div class="detail-row"><span class="detail-label">Timing</span><span class="detail-value">${s.time}</span></div>
+      <div class="detail-row"><span class="detail-label">Cycle</span><span class="detail-value">${s.cycle}</span></div>
+      ${s.category==='injection'?`
+      <div class="recon-box">
+        <div class="recon-title">RECONSTITUTION</div>
+        <div class="recon-row"><span class="recon-key">Vial size</span><span class="recon-val">${s.recon.vial}</span></div>
+        <div class="recon-row"><span class="recon-key">Bac water</span><span class="recon-val">${s.recon.water}</span></div>
+        <div class="recon-row"><span class="recon-key">Concentration</span><span class="recon-val">${s.recon.conc}</span></div>
+        <div class="recon-row"><span class="recon-key">Your dose</span><span class="recon-val">${s.recon.dose}</span></div>
+        <div class="recon-row"><span class="recon-key">Shelf life</span><span class="recon-val">${s.recon.shelf}</span></div>
+      </div>`:''}
+      ${s.combineWith?`<div class="combine-box">💉 ${s.combineWith}</div>`:''}
+      ${s.warning?`<div class="warn-box">⚠️ ${s.warning}</div>`:''}
+    </div>
+  </div>`;
+}
+
+let currentTab = 'daily';
+function renderCurrentTab(){ showTab(currentTab, null, true); }
+
+function showTab(name, btn, silent){
+  currentTab = name;
+  if(!silent){
+    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+    if(btn) btn.classList.add('active');
+  }
+  const c = document.getElementById('main-content');
+
+  if(name==='daily'){
+    const times = [...new Set(SUPPS.map(s=>s.time))].sort((a,b)=>TIME_ORDER.indexOf(a)-TIME_ORDER.indexOf(b));
+    let html = '';
+    times.forEach(t=>{
+      const group = SUPPS.filter(s=>s.time===t);
+      const colors = {'Morning':'#f59e0b','8PM — night stack':'#6366f1','Weekly — Monday AM':'#e8572a','Night — before bed':'#a855f7','Night — 30 min before bed':'#6366f1'};
+      const col = colors[t]||'var(--muted)';
+      html += `<div class="section-header" style="background:${col}15;color:${col}">${t.toUpperCase()}</div>`;
+      group.forEach(s=>{ html += renderSupp(s); });
+    });
+    c.innerHTML = html;
+  }
+
+  else if(name==='injections'){
+    c.innerHTML = `
+    <div class="slabel">DAILY INJECTION MAP — all under 40 units</div>
+    <div class="inject-card">
+      <div class="inject-time" style="color:var(--gold)">☀️ MORNING — INJECTION 1 (SOLO)</div>
+      <div class="inject-combo"><span class="inject-icon">💉</span><span class="inject-text"><strong>Growth Hormone (Arctotropin)</strong><br>2 IU — Solo only, cannot combine</span><span class="inject-units">20 units</span></div>
+    </div>
+    <div class="inject-card">
+      <div class="inject-time" style="color:var(--green)">☀️ MORNING — INJECTION 2 (COMBINED)</div>
+      <div class="inject-combo"><span class="inject-icon">💉</span><span class="inject-text"><strong>KLOW/REGEN</strong> + <strong>MitoStack</strong><br>Draw KLOW first, then MitoStack same syringe</span><span class="inject-units">11 units</span></div>
+      <div class="note-box">Draw order: KLOW 6 units → MitoStack 5 units → inject together SubQ abdomen</div>
+    </div>
+    <div class="inject-card">
+      <div class="inject-time" style="color:var(--accent)">📅 WEEKLY MONDAY — INJECTION 3 (COMBINED)</div>
+      <div class="inject-combo"><span class="inject-icon">💉</span><span class="inject-text"><strong>Retatrutide</strong> + <strong>Semaglutide</strong><br>Draw Retatrutide first, then Sema same syringe</span><span class="inject-units">20-30 units</span></div>
+      <div class="note-box">3mg Reta (15u) + Sema (5u) = 20 units total<br>5mg Reta (25u) + Sema (5u) = 30 units total</div>
+    </div>
+    <div class="inject-card">
+      <div class="inject-time" style="color:var(--purple)">📅 BI-WEEKLY — INJECTION 4 (SOLO)</div>
+      <div class="inject-combo"><span class="inject-icon">💉</span><span class="inject-text"><strong>Testosterone Enanthate</strong> (IM) OR <strong>Testosterone Cypionate</strong> (SubQ)<br>Alternating every 2 weeks. NEVER combine — oil based.</span><span class="inject-units">Solo</span></div>
+      <div class="warn-box">⚠️ Take Anastrozole 0.5mg oral tablet SAME DAY as any testosterone injection</div>
+    </div>
+    <div class="inject-card">
+      <div class="inject-time" style="color:var(--purple)">🌙 NIGHT — INJECTION 5 (COMBINED)</div>
+      <div class="inject-combo"><span class="inject-icon">💉</span><span class="inject-text"><strong>N-Acetyl Epithalon</strong> + <strong>DSIP</strong><br>DURING EPITHALON CYCLE ONLY (10-20 days)</span><span class="inject-units">26 units</span></div>
+      <div class="note-box">Epithalon 25u + DSIP 1u = 26 units<br>Note: Epithalon dose is 50 units total — split into 2 separate injections of 25 units at different sites</div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <div class="slabel">DAILY NEEDLE COUNT</div>
+      <div style="font-size:13px;color:#d0d0d0;line-height:1.8">
+        Most days: <strong style="color:var(--green)">2 needles</strong> (GH solo + KLOW/Mito combined)<br>
+        Monday: <strong style="color:var(--gold)">3 needles</strong> (+ Retatrutide/Sema combined)<br>
+        Testosterone weeks: <strong style="color:var(--gold)">3 needles</strong> (+ Test solo)<br>
+        During Epithalon cycle: <strong style="color:var(--accent)">+1 needle at night</strong>
+      </div>
+    </div>`;
+  }
+
+  else if(name==='cycles'){
+    let html = '<div class="slabel">CYCLE TRACKER — tap to set start date</div>';
+    CYCLES.forEach(cy=>{
+      const startDate = (data.cycles||{})[cy.startKey];
+      let daysIn = 0, pct = 0, remaining = '—';
+      if(startDate){
+        daysIn = Math.floor((Date.now()-new Date(startDate))/(1000*60*60*24));
+        if(cy.total){ pct = Math.min(100,Math.round((daysIn/cy.total)*100)); remaining = Math.max(0,cy.total-daysIn)+' days left'; }
+        else{ remaining = daysIn+' days in'; pct = 50; }
+      }
+      html += `<div class="cycle-card" style="border-left:3px solid ${cy.color}">
+        <div class="cycle-name">${cy.name}</div>
+        <div class="cycle-sub">${cy.note}</div>
+        <div class="cycle-bar"><div class="cycle-fill" style="width:${pct}%;background:${cy.color}"></div></div>
+        <div class="cycle-info">
+          <span>${startDate?'Day '+daysIn:'Not started'}</span>
+          <span>${remaining}</span>
+        </div>
+        <div class="cycle-btns">
+          <button class="cycle-btn" onclick="startCycle('${cy.startKey}')">Start Today</button>
+          <button class="cycle-btn" onclick="resetCycle('${cy.startKey}')">Reset</button>
+        </div>
+      </div>`;
+    });
+    c.innerHTML = html;
+  }
+
+  else if(name==='recon'){
+    c.innerHTML = `
+    <div class="slabel">RECONSTITUTION REFERENCE — keep all injections under 40 units</div>
+    ${[
+      {name:'Retatrutide 30mg',water:'1.5mL bac water',conc:'20mg/mL',doses:'3mg=15u · 4mg=20u · 5mg=25u',shelf:'6-8 weeks fridge',color:'#e8572a'},
+      {name:'Semaglutide 5mg',water:'1mL bac water',conc:'5mg/mL',doses:'0.25mg = 5 units',shelf:'8 weeks fridge',color:'#3b82f6'},
+      {name:'GH Arctotropin',water:'1mL bac water',conc:'10 IU/mL',doses:'2 IU = 20 units',shelf:'28 days fridge',color:'#f59e0b'},
+      {name:'KLOW 80mg',water:'2mL bac water',conc:'40mg/mL',doses:'250mcg = 6 units',shelf:'4-6 weeks fridge',color:'#22c55e'},
+      {name:'REGEN 20mg (current)',water:'2mL bac water',conc:'10mg/mL',doses:'250mcg = 5 units',shelf:'4-6 weeks fridge',color:'#22c55e'},
+      {name:'MitoStack 120mg',water:'2mL bac water',conc:'60mg/mL',doses:'300mcg = 5 units',shelf:'4-6 weeks fridge',color:'#14b8a6'},
+      {name:'DSIP 10mg',water:'0.5mL ONLY (half vial)',conc:'20mg/mL',doses:'200mcg = 1 unit',shelf:'MAX 2 weeks — do half at a time',color:'#6366f1'},
+      {name:'N-Acetyl Epithalon 20mg',water:'0.5mL per half (10mg)',conc:'20mg/mL',doses:'10mg = 2×25 units at diff sites',shelf:'3-4 weeks per half',color:'#a855f7'},
+    ].map(r=>`<div class="card" style="border-left:3px solid ${r.color}">
+      <div style="font-weight:700;font-size:14px;margin-bottom:8px;color:${r.color}">${r.name}</div>
+      <div class="detail-row"><span class="detail-label">Bac water</span><span class="detail-value">${r.water}</span></div>
+      <div class="detail-row"><span class="detail-label">Concentration</span><span class="detail-value">${r.conc}</span></div>
+      <div class="detail-row"><span class="detail-label">Your dose</span><span class="detail-value">${r.doses}</span></div>
+      <div class="detail-row"><span class="detail-label">Shelf life</span><span class="detail-value">${r.shelf}</span></div>
+    </div>`).join('')}
+    <div class="note-box" style="margin-top:8px">💡 Always use bacteriostatic water (not sterile water) for multi-draw vials. Wipe stopper with alcohol before every draw. Label vial with reconstitution date.</div>`;
+  }
+
+  else if(name==='order'){
+    c.innerHTML = `
+    <div class="slabel">2-MONTH ORDER LIST — VPEPTIDE.COM</div>
+    ${[
+      {n:'Retatrutide 30mg',qty:'2 bottles',why:'3mg→5mg weekly. One bottle ≈ 6-8 weeks. Two bottles = full 2 months.',price:'~$XX × 2'},
+      {n:'N-Acetyl Epithalon 20mg',qty:'1 bottle',why:'Two full 10-20 day cycles. Split vial: 0.5mL bac water per half.',price:'$99.99'},
+      {n:'KLOW 80mg',qty:'1 bottle',why:'Upgrades current REGEN with GHK-cu + KPV. ACL + rotator cuff + skin repair.',price:'$144.99'},
+      {n:'MitoStack 120mg',qty:'1 bottle',why:'MOTS-C + 5-amino-1MQ + NAD+. Daily fat burning + energy. 2 months supply.',price:'$99.99'},
+    ].map((item,i)=>`<div class="order-item">
+      <div class="order-num">${i+1}</div>
+      <div class="order-info">
+        <div class="order-name">${item.n}</div>
+        <div class="order-detail">${item.why}</div>
+        <div class="order-qty">Qty: ${item.qty} · ${item.price}</div>
+      </div>
+    </div>`).join('')}
+    <div class="card" style="margin-top:8px;background:rgba(34,197,94,0.08);border-color:rgba(34,197,94,0.3)">
+      <div class="slabel" style="color:var(--green)">ALREADY HAVE — DO NOT REORDER YET</div>
+      ${['Arctotropin GH — in fridge','REGEN 20mg (BPC-157 + TB-500) — in fridge','DSIP 10mg — in fridge','Semaglutide 5mg — 20 weeks supply at 0.25mg/week'].map(i=>`<div style="font-size:13px;color:#d0d0d0;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.05)">✅ ${i}</div>`).join('')}
+    </div>
+    <div class="card" style="margin-top:8px;background:rgba(245,158,11,0.08);border-color:rgba(245,158,11,0.3)">
+      <div class="slabel" style="color:var(--gold)">ALSO NEEDED — PHARMACY / DOCTOR</div>
+      ${['Anastrozole 0.5mg — on testosterone injection days','Cytomel (T3) 12.5mcg — daily, do not increase without bloodwork','Atorvastatin — daily with CoQ10','Bacteriostatic water — multiple vials for reconstitution','Insulin syringes (29-31g, 0.5mL/50 unit) — buy in bulk to reduce cost'].map(i=>`<div style="font-size:13px;color:#d0d0d0;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.05)">📋 ${i}</div>`).join('')}
+    </div>`;
+  }
+}
+
+function startCycle(key){
+  if(!data.cycles) data.cycles={};
+  data.cycles[key] = new Date().toISOString();
+  save();
+  renderCurrentTab();
+}
+function resetCycle(key){
+  if(data.cycles) delete data.cycles[key];
+  save();
+  renderCurrentTab();
+}
+
+showTab('daily', document.querySelector('.nav-btn'));
+</script>
+</body>
+</html>

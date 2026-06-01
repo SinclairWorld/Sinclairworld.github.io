@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Sinclair World">
+<title>Sinclair World</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0f;--card:#111118;--border:#1e1e2e;
+  --accent:#e8572a;--blue:#3b82f6;--green:#22c55e;
+  --gold:#f59e0b;--purple:#a855f7;--teal:#14b8a6;--teal:#14b8a6;
+  --text:#f0f0f0;--muted:#6b7280;
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+}
+html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif}
+.app{padding-top:var(--safe-top);padding-bottom:calc(30px + var(--safe-bottom));min-height:100vh}
+.header{padding:32px 24px 24px;text-align:center;border-bottom:1px solid var(--border);margin-bottom:24px}
+.logo{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:42px;letter-spacing:-1px;line-height:1;margin-bottom:6px}
+.logo span{color:var(--accent)}
+.tagline{font-size:13px;color:var(--muted);letter-spacing:1px}
+.date{font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--accent);letter-spacing:2px;margin-top:8px}
+.grid{display:flex;flex-direction:column;gap:14px;padding:0 16px}
+.app-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;text-decoration:none;color:var(--text);display:block;position:relative;overflow:hidden;transition:transform 0.15s}
+.app-card:active{transform:scale(0.98)}
+.card-glow{position:absolute;top:-30px;right:-30px;width:100px;height:100px;border-radius:50%;opacity:0.15;filter:blur(30px)}
+.card-eyebrow{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:3px;margin-bottom:6px}
+.card-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:26px;line-height:1;margin-bottom:6px}
+.card-desc{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:14px}
+.card-tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600}
+.card-arrow{position:absolute;bottom:20px;right:20px;font-size:20px;opacity:0.4}
+.stats-row{display:flex;gap:10px;margin-top:14px}
+.stat{flex:1;background:rgba(255,255,255,0.04);border-radius:10px;padding:10px;text-align:center}
+.stat-val{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:20px}
+.stat-label{font-size:10px;color:var(--muted);margin-top:2px}
+.coming-card{background:rgba(255,255,255,0.02);border:1px dashed var(--border);border-radius:16px;padding:20px;text-align:center}
+.coming-title{font-family:'Barlow Condensed',sans-serif;font-size:18px;color:var(--muted);margin-bottom:4px}
+.coming-sub{font-size:12px;color:var(--subtle,#374151)}
+.divider{height:1px;background:var(--border);margin:20px 16px}
+.section-title{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:3px;color:var(--muted);padding:0 16px;margin-bottom:12px}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="logo">SINCLAIR<span>WORLD</span></div>
+    <div class="tagline">PERFORMANCE · RECOVERY · OPTIMIZATION</div>
+    <div class="date" id="today-date"></div>
+  </div>
+
+  <div class="section-title">YOUR APPS</div>
+  <div class="grid">
+
+    <!-- Workout App -->
+    <a href="troy-workout.html" class="app-card" style="border-left:3px solid var(--accent)">
+      <div class="card-glow" style="background:var(--accent)"></div>
+      <div class="card-eyebrow" style="color:var(--accent)">PHASE 1 — ACTIVE</div>
+      <div class="card-title">TRAINING<br>PROTOCOL</div>
+      <div class="card-desc">3-day program — Upper Pull · Lower Body · Upper Push. ACL rehab, left quad rebuild, rotator cuff protection. Progressive phases through 16 weeks.</div>
+      <div class="card-tags">
+        <span class="tag" style="background:rgba(232,87,42,0.15);color:var(--accent)">3 Days/Week</span>
+        <span class="tag" style="background:rgba(34,197,94,0.15);color:var(--green)">ACL Safe</span>
+        <span class="tag" style="background:rgba(245,158,11,0.15);color:var(--gold)">Progressive</span>
+        <span class="tag" style="background:rgba(168,85,247,0.15);color:var(--purple)">Daily Vacuums</span>
+      </div>
+      <div class="card-arrow">→</div>
+    </a>
+
+    <!-- Supplement App -->
+    <a href="supplement-protocol.html" class="app-card" style="border-left:3px solid var(--blue)">
+      <div class="card-glow" style="background:var(--blue)"></div>
+      <div class="card-eyebrow" style="color:var(--blue)">FULL STACK — 20+ COMPOUNDS</div>
+      <div class="card-title">SUPPLEMENT<br>PROTOCOL</div>
+      <div class="card-desc">Complete daily protocol with injection combining guide, reconstitution calculator, cycle tracker, and editable dosing. Everything under 40 units per injection.</div>
+      <div class="card-tags">
+        <span class="tag" style="background:rgba(59,130,246,0.15);color:var(--blue)">Editable</span>
+        <span class="tag" style="background:rgba(232,87,42,0.15);color:var(--accent)">Retatrutide</span>
+        <span class="tag" style="background:rgba(34,197,94,0.15);color:var(--green)">Injection Map</span>
+        <span class="tag" style="background:rgba(168,85,247,0.15);color:var(--purple)">Cycle Tracker</span>
+      </div>
+      <div class="card-arrow">→</div>
+    </a>
+
+    <!-- Calendar App -->
+    <a href="calendar.html" class="app-card" style="border-left:3px solid var(--teal)">
+      <div class="card-glow" style="background:var(--teal)"></div>
+      <div class="card-eyebrow" style="color:var(--teal)">INJECTIONS · WORKOUTS · WALKS</div>
+      <div class="card-title">SCHEDULE &<br>CALENDAR</div>
+      <div class="card-desc">Visual calendar with all injection dates, workout days, and morning walks. Google Calendar links for every recurring event with 6:00 AM reminders.</div>
+      <div class="card-tags">
+        <span class="tag" style="background:rgba(20,184,166,0.15);color:var(--teal)">Injection Tracker</span>
+        <span class="tag" style="background:rgba(232,87,42,0.15);color:var(--accent)">Every 5 Days</span>
+        <span class="tag" style="background:rgba(168,85,247,0.15);color:var(--purple)">Friday Test</span>
+        <span class="tag" style="background:rgba(34,197,94,0.15);color:var(--green)">Google Cal</span>
+      </div>
+      <div class="card-arrow">→</div>
+    </a>
+
+    <div class="divider"></div>
+    <div class="section-title">COMING SOON</div>
+
+    <!-- Progress Tracker (coming) -->
+    <div class="coming-card">
+      <div style="font-size:28px;margin-bottom:8px">📈</div>
+      <div class="coming-title">Progress Tracker</div>
+      <div class="coming-sub">Weight · Waist · Photos · Strength logs · Sleep quality</div>
+    </div>
+
+    <!-- Nutrition Guide (coming) -->
+    <div class="coming-card">
+      <div style="font-size:28px;margin-bottom:8px">🍽️</div>
+      <div class="coming-title">Nutrition Guide</div>
+      <div class="coming-sub">High protein meals built around Retatrutide appetite suppression</div>
+    </div>
+
+  </div>
+</div>
+<script>
+const d = new Date();
+document.getElementById('today-date').textContent = d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'}).toUpperCase();
+</script>
+</body>
+</html>

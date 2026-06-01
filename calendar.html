@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="My Schedule">
+<title>Sinclair Schedule</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0f;--card:#111118;--border:#1e1e2e;
+  --accent:#e8572a;--blue:#3b82f6;--green:#22c55e;
+  --gold:#f59e0b;--purple:#a855f7;--teal:#14b8a6;
+  --red:#ef4444;--text:#f0f0f0;--muted:#6b7280;
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;overflow:hidden}
+.app{display:flex;flex-direction:column;height:100%;padding-top:var(--safe-top)}
+.header{padding:16px 20px 12px;border-bottom:1px solid var(--border);flex-shrink:0}
+.eyebrow{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:3px;color:var(--accent);margin-bottom:2px}
+.title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:24px;line-height:1}
+.title span{color:var(--accent)}
+.nav{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav-btn{background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);font-family:'Barlow',sans-serif;font-weight:600;font-size:12px;padding:12px 14px 10px;cursor:pointer;white-space:nowrap;transition:all 0.15s;flex-shrink:0}
+.nav-btn.active{color:var(--text);border-bottom-color:var(--accent)}
+.content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;padding-bottom:calc(20px + var(--safe-bottom))}
+.slabel{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;color:var(--muted);margin-bottom:10px;margin-top:4px}
+
+/* Calendar grid */
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.cal-month{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:22px}
+.cal-nav{background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:8px;padding:6px 14px;cursor:pointer;color:var(--text);font-size:16px;font-family:'Barlow',sans-serif}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:16px}
+.cal-dow{text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:var(--muted);padding:6px 0}
+.cal-day{min-height:52px;background:rgba(255,255,255,0.02);border-radius:8px;padding:4px;cursor:pointer;border:1px solid transparent;transition:all 0.15s;position:relative}
+.cal-day.today{border-color:var(--accent)}
+.cal-day.selected{background:rgba(232,87,42,0.15);border-color:var(--accent)}
+.cal-day.other-month{opacity:0.3}
+.cal-day-num{font-size:12px;font-weight:600;margin-bottom:2px;text-align:center}
+.cal-day.today .cal-day-num{color:var(--accent)}
+.cal-dots{display:flex;flex-wrap:wrap;gap:2px;justify-content:center}
+.cal-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+
+/* Event list */
+.event-card{background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:8px;overflow:hidden}
+.event-header{display:flex;align-items:center;gap:12px;padding:12px 14px}
+.event-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.event-info{flex:1;min-width:0}
+.event-name{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.event-time{font-size:12px;color:var(--muted);margin-top:2px}
+.event-date{font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;white-space:nowrap;flex-shrink:0}
+.gcal-btn{display:flex;align-items:center;gap:8px;background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);border-radius:10px;padding:10px 14px;margin:0 14px 12px;text-decoration:none;color:var(--blue);font-size:13px;font-weight:600}
+.gcal-icon{font-size:16px;flex-shrink:0}
+
+/* Upcoming list */
+.upcoming-row{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:8px}
+.upcoming-date-box{min-width:44px;background:rgba(255,255,255,0.05);border-radius:8px;padding:6px;text-align:center;flex-shrink:0}
+.upcoming-month{font-size:9px;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;color:var(--muted)}
+.upcoming-day{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:20px;line-height:1}
+.upcoming-info{flex:1}
+.upcoming-name{font-weight:600;font-size:14px;margin-bottom:3px}
+.upcoming-detail{font-size:12px;color:var(--muted);line-height:1.4}
+.upcoming-tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-top:4px}
+
+/* Add to calendar section */
+.add-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px}
+.add-title{font-weight:600;font-size:15px;margin-bottom:4px}
+.add-sub{font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5}
+.add-btn{display:block;text-align:center;background:var(--blue);border:none;border-radius:10px;padding:12px;color:#fff;font-family:'Barlow',sans-serif;font-weight:700;font-size:14px;text-decoration:none;margin-bottom:8px;cursor:pointer}
+.add-btn.green{background:var(--green);color:#000}
+.add-btn.purple{background:var(--purple)}
+.add-btn.gold{background:var(--gold);color:#000}
+.add-btn.red{background:var(--red)}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="eyebrow">SINCLAIR PERFORMANCE</div>
+    <div class="title">SCHEDULE &<br><span>INJECTION CALENDAR</span></div>
+  </div>
+  <nav class="nav">
+    <button class="nav-btn active" onclick="showTab('calendar',this)">Calendar</button>
+    <button class="nav-btn" onclick="showTab('upcoming',this)">Upcoming</button>
+    <button class="nav-btn" onclick="showTab('addcal',this)">+ Add to Google</button>
+    <button class="nav-btn" onclick="showTab('routine',this)">Daily Routine</button>
+  </nav>
+  <div class="content" id="main-content"></div>
+</div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────
+const TODAY = new Date(2026, 5, 1); // June 1 2026
+const RETA_LAST = new Date(2026, 4, 30); // May 30 (2 days ago)
+const RETA_INTERVAL = 5;
+
+// Last Friday (May 29) = Cypionate
+// This Friday (Jun 6) = Enanthate
+// Jun 13 = Cypionate, Jun 20 = Enanthate...
+const TEST_START_FRIDAY = new Date(2026, 5, 6); // Jun 6 = Enanthate
+const WORKOUT_DAYS = [1,3,5]; // Mon=1,Wed=3,Fri=5
+
+const COLORS = {
+  reta:'#e8572a', sema:'#3b82f6', testE:'#a855f7',
+  testC:'#8b5cf6', anastrozole:'#ef4444', walk:'#22c55e',
+  workout:'#f59e0b', klow:'#14b8a6', gh:'#f59e0b'
+};
+
+function addDays(d,n){const r=new Date(d);r.setDate(r.getDate()+n);return r;}
+function sameDay(a,b){return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();}
+function fmtDate(d){return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});}
+function fmtFull(d){return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric',year:'numeric'});}
+function fmtMonth(d){return d.toLocaleDateString('en-US',{month:'long',day:'numeric'});}
+
+// Generate events for next 90 days
+function generateEvents(){
+  const events=[];
+  const end=addDays(TODAY,90);
+
+  // Retatrutide every 5 days
+  let retaDate=new Date(RETA_LAST);
+  while(retaDate<=end){
+    if(retaDate>=TODAY){
+      events.push({date:new Date(retaDate),type:'reta',name:'Retatrutide + Semaglutide',detail:'SubQ combined · Reta 3-5mg + Sema 0.25mg · Under 30 units total',color:COLORS.reta,reminder:'6:00 AM'});
+    }
+    retaDate=addDays(retaDate,5);
+  }
+
+  // Testosterone alternating Fridays
+  let testDate=new Date(TEST_START_FRIDAY);
+  let isEnanthate=true;
+  while(testDate<=end){
+    if(testDate>=TODAY){
+      if(isEnanthate){
+        events.push({date:new Date(testDate),type:'testE',name:'Testosterone Enanthate',detail:'IM injection · As prescribed · Take Anastrozole 0.5mg oral same day',color:COLORS.testE,reminder:'6:00 AM'});
+      } else {
+        events.push({date:new Date(testDate),type:'testC',name:'Testosterone Cypionate',detail:'SubQ · 100mg (50 units) · Take Anastrozole 0.5mg oral same day',color:COLORS.testC,reminder:'6:00 AM'});
+      }
+      events.push({date:new Date(testDate),type:'anastrozole',name:'Anastrozole 0.5mg',detail:'Oral tablet · Take with testosterone injection · Estrogen control',color:COLORS.anastrozole,reminder:'6:00 AM'});
+    }
+    testDate=addDays(testDate,14);
+    isEnanthate=!isEnanthate;
+  }
+
+  // Workouts Mon/Wed/Fri
+  let d=new Date(TODAY);
+  while(d<=end){
+    const dow=d.getDay();
+    if(WORKOUT_DAYS.includes(dow)){
+      const dayName=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dow];
+      const workoutName=dow===1?'Day A — Upper Pull + Rotator Cuff':dow===3?'Day B — Lower Body ACL Safe':'Day C — Upper Push + Core';
+      events.push({date:new Date(d),type:'workout',name:workoutName,detail:'Home gym · Stomach vacuums included · Check workout app for exercises',color:COLORS.workout,reminder:'6:00 AM'});
+    }
+    // Walk on non-workout days
+    if(![1,3,5].includes(dow)){
+      events.push({date:new Date(d),type:'walk',name:'Morning Walk',detail:'Zone 2 · Low impact · ACL-friendly active recovery · Fasted if possible',color:COLORS.walk,reminder:'6:00 AM'});
+    }
+    d=addDays(d,1);
+  }
+
+  return events.sort((a,b)=>a.date-b.date);
+}
+
+const ALL_EVENTS=generateEvents();
+
+function eventsOnDay(date){return ALL_EVENTS.filter(e=>sameDay(e.date,date));}
+
+// ── GOOGLE CALENDAR URL BUILDER ──────────────────────────
+function gcalURL(title, startDate, description, recurrence){
+  const pad=n=>String(n).padStart(2,'0');
+  const fmt=d=>`${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T060000`;
+  const fmtEnd=d=>`${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T063000`;
+  let url=`https://calendar.google.com/calendar/render?action=TEMPLATE`;
+  url+=`&text=${encodeURIComponent(title)}`;
+  url+=`&dates=${fmt(startDate)}/${fmtEnd(startDate)}`;
+  url+=`&details=${encodeURIComponent(description)}`;
+  if(recurrence) url+=`&recur=${encodeURIComponent(recurrence)}`;
+  return url;
+}
+
+// ── CALENDAR VIEW ──────────────────────────────────────
+let viewYear=TODAY.getFullYear();
+let viewMonth=TODAY.getMonth();
+let selectedDate=new Date(TODAY);
+
+function renderCalendar(){
+  const firstDay=new Date(viewYear,viewMonth,1);
+  const lastDay=new Date(viewYear,viewMonth+1,0);
+  const startDow=firstDay.getDay();
+  const monthName=firstDay.toLocaleDateString('en-US',{month:'long',year:'numeric'}).toUpperCase();
+
+  let html=`<div class="cal-header">
+    <button class="cal-nav" onclick="changeMonth(-1)">‹</button>
+    <div class="cal-month">${monthName}</div>
+    <button class="cal-nav" onclick="changeMonth(1)">›</button>
+  </div>
+  <div class="cal-grid">
+    ${['SUN','MON','TUE','WED','THU','FRI','SAT'].map(d=>`<div class="cal-dow">${d}</div>`).join('')}`;
+
+  // Prev month padding
+  for(let i=0;i<startDow;i++){
+    const d=addDays(firstDay,i-startDow);
+    html+=`<div class="cal-day other-month"><div class="cal-day-num">${d.getDate()}</div></div>`;
+  }
+
+  // Days of month
+  for(let day=1;day<=lastDay.getDate();day++){
+    const d=new Date(viewYear,viewMonth,day);
+    const isToday=sameDay(d,TODAY);
+    const isSel=sameDay(d,selectedDate);
+    const dayEvents=eventsOnDay(d);
+    const dots=[...new Set(dayEvents.map(e=>e.color))].slice(0,4);
+    html+=`<div class="cal-day${isToday?' today':''}${isSel?' selected':''}" onclick="selectDay(${viewYear},${viewMonth},${day})">
+      <div class="cal-day-num">${day}</div>
+      <div class="cal-dots">${dots.map(c=>`<div class="cal-dot" style="background:${c}"></div>`).join('')}</div>
+    </div>`;
+  }
+
+  html+=`</div>`;
+
+  // Selected day events
+  const selEvents=eventsOnDay(selectedDate);
+  html+=`<div class="slabel">${fmtFull(selectedDate).toUpperCase()}</div>`;
+  if(selEvents.length===0){
+    html+=`<div style="text-align:center;color:var(--muted);padding:20px;font-size:13px">No injections or events scheduled</div>`;
+  } else {
+    selEvents.forEach(e=>{
+      html+=`<div class="event-card" style="border-left:3px solid ${e.color}">
+        <div class="event-header">
+          <div class="event-dot" style="background:${e.color}"></div>
+          <div class="event-info">
+            <div class="event-name">${e.name}</div>
+            <div class="event-time">⏰ ${e.reminder} reminder · ${e.detail}</div>
+          </div>
+        </div>
+      </div>`;
+    });
+  }
+
+  document.getElementById('main-content').innerHTML=html;
+}
+
+function changeMonth(dir){
+  viewMonth+=dir;
+  if(viewMonth>11){viewMonth=0;viewYear++;}
+  if(viewMonth<0){viewMonth=11;viewYear--;}
+  renderCalendar();
+}
+
+function selectDay(y,m,d){
+  selectedDate=new Date(y,m,d);
+  renderCalendar();
+}
+
+// ── UPCOMING VIEW ──────────────────────────────────────
+function renderUpcoming(){
+  const next30=ALL_EVENTS.filter(e=>e.date>=TODAY&&e.date<=addDays(TODAY,30));
+  // Group by date
+  const grouped={};
+  next30.forEach(e=>{
+    const k=e.date.toDateString();
+    if(!grouped[k]) grouped[k]=[];
+    grouped[k].push(e);
+  });
+
+  let html='<div class="slabel">NEXT 30 DAYS</div>';
+  Object.keys(grouped).forEach(k=>{
+    const evs=grouped[k];
+    const d=evs[0].date;
+    const isToday=sameDay(d,TODAY);
+    evs.forEach(e=>{
+      html+=`<div class="upcoming-row" style="border-left:3px solid ${e.color}${isToday?';background:rgba(232,87,42,0.05)':''}">
+        <div class="upcoming-date-box">
+          <div class="upcoming-month">${d.toLocaleDateString('en-US',{month:'short'}).toUpperCase()}</div>
+          <div class="upcoming-day" style="color:${e.color}">${d.getDate()}</div>
+          <div class="upcoming-month">${d.toLocaleDateString('en-US',{weekday:'short'}).toUpperCase()}</div>
+        </div>
+        <div class="upcoming-info">
+          <div class="upcoming-name">${e.name}</div>
+          <div class="upcoming-detail">${e.detail}</div>
+          <span class="upcoming-tag" style="background:${e.color}22;color:${e.color}">⏰ 6:00 AM${isToday?' · TODAY':''}</span>
+        </div>
+      </div>`;
+    });
+  });
+
+  document.getElementById('main-content').innerHTML=html;
+}
+
+// ── ADD TO GOOGLE CALENDAR ──────────────────────────────
+function renderAddCal(){
+  // Next Reta date
+  let nextReta=new Date(RETA_LAST);
+  while(nextReta<TODAY) nextReta=addDays(nextReta,5);
+
+  const items=[
+    {
+      title:'💉 Retatrutide + Semaglutide',
+      color:'var(--accent)',
+      btnClass:'',
+      desc:'SubQ injection — Retatrutide 3-5mg + Semaglutide 0.25mg combined in one syringe. Total under 30 units. Reconstitution: Reta 30mg/1.5mL bac water (20mg/mL). Sema 5mg/1mL (5mg/mL).',
+      startDate:nextReta,
+      recur:'RRULE:FREQ=DAILY;INTERVAL=5',
+      note:'Every 5 days — the day shifts each cycle. Next dose: '+fmtDate(nextReta)
+    },
+    {
+      title:'💉 Testosterone Enanthate (IM)',
+      color:'var(--purple)',
+      btnClass:'purple',
+      desc:'IM injection — as prescribed. Take Anastrozole 0.5mg oral tablet same morning. Rotate injection sites.',
+      startDate:new Date(2026,5,6),
+      recur:'RRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=FR',
+      note:'Every 2 weeks — Fridays starting June 6'
+    },
+    {
+      title:'💉 Testosterone Cypionate (SubQ)',
+      color:'#8b5cf6',
+      btnClass:'purple',
+      desc:'SubQ injection — 100mg (50 units). Take Anastrozole 0.5mg oral tablet same morning.',
+      startDate:new Date(2026,5,13),
+      recur:'RRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=FR',
+      note:'Every 2 weeks — Fridays starting June 13'
+    },
+    {
+      title:'💊 Anastrozole 0.5mg',
+      color:'var(--red)',
+      btnClass:'red',
+      desc:'Oral tablet — take on testosterone injection days ONLY. Estrogen control. Do not take on non-injection days.',
+      startDate:new Date(2026,5,6),
+      recur:'RRULE:FREQ=WEEKLY;INTERVAL=1;BYDAY=FR',
+      note:'Every Friday — paired with testosterone injection'
+    },
+    {
+      title:'🏋️ Workout — Day A (Upper Pull)',
+      color:'var(--gold)',
+      btnClass:'gold',
+      desc:'Home gym training — Upper Pull + Rotator Cuff. Band external rotation, lat pulldown, seated row, curls, core + stomach vacuums. Check sinclairworld.github.io/troy-workout.html',
+      startDate:new Date(2026,5,1),
+      recur:'RRULE:FREQ=WEEKLY;BYDAY=MO',
+      note:'Every Monday'
+    },
+    {
+      title:'🏋️ Workout — Day B (Lower Body)',
+      color:'var(--gold)',
+      btnClass:'gold',
+      desc:'Home gym training — Lower Body ACL Safe. TKE, goblet squat, Bulgarian split squat, RDL, leg curl, hip thrust. Check sinclairworld.github.io/troy-workout.html',
+      startDate:new Date(2026,5,3),
+      recur:'RRULE:FREQ=WEEKLY;BYDAY=WE',
+      note:'Every Wednesday'
+    },
+    {
+      title:'🏋️ Workout — Day C (Upper Push)',
+      color:'var(--gold)',
+      btnClass:'gold',
+      desc:'Home gym training — Upper Push + Core Burn. Bench press, incline DB, cable lateral raise, overhead press, triceps, hanging knee raise. Check sinclairworld.github.io/troy-workout.html',
+      startDate:new Date(2026,5,5),
+      recur:'RRULE:FREQ=WEEKLY;BYDAY=FR',
+      note:'Every Friday'
+    },
+    {
+      title:'🚶 Morning Walk — Active Recovery',
+      color:'var(--green)',
+      btnClass:'green',
+      desc:'Zone 2 easy walk — ACL-friendly active recovery. Low impact. Fasted if possible. Get outside for natural light — helps clear Gabapentin grogginess.',
+      startDate:new Date(2026,5,2),
+      recur:'RRULE:FREQ=WEEKLY;BYDAY=TU,TH,SA,SU',
+      note:'Every Tue, Thu, Sat, Sun'
+    },
+  ];
+
+  let html=`<div class="slabel">TAP ANY BUTTON TO ADD TO GOOGLE CALENDAR</div>
+  <div style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.3);border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:13px;color:#93c5fd;line-height:1.6">
+    Each button opens Google Calendar with the event pre-filled. Tap <strong>Save</strong> in Google Calendar to add it. All events include a 6:00 AM reminder. Do this once and your injections are tracked forever.
+  </div>`;
+
+  items.forEach(item=>{
+    html+=`<div class="add-card">
+      <div class="add-title" style="color:${item.color}">${item.title}</div>
+      <div class="add-sub">${item.note}</div>
+      <a class="add-btn ${item.btnClass}" href="${gcalURL(item.title, item.startDate, item.desc, item.recur)}" target="_blank">
+        + Add to Google Calendar
+      </a>
+    </div>`;
+  });
+
+  document.getElementById('main-content').innerHTML=html;
+}
+
+// ── DAILY ROUTINE ──────────────────────────────────────
+function renderRoutine(){
+  const routineWorkout=[
+    {time:'6:00 AM',icon:'⏰',title:'Wake up — outside immediately',detail:'Natural light clears Gabapentin grogginess. Critical command from your protocol.'},
+    {time:'6:15 AM',icon:'💉',title:'Growth Hormone (Arctotropin)',detail:'2 IU SubQ — solo injection, cannot combine. First thing before food.'},
+    {time:'6:20 AM',icon:'💉',title:'KLOW/REGEN + MitoStack combined',detail:'One syringe — 11 units total. SubQ abdomen. Rotate sites.'},
+    {time:'6:30 AM',icon:'💊',title:'Morning oral stack',detail:'Alpha GPC · Creatine 5g · Sulforaphane · Fish Oil + CoQ10 · Atorvastatin · Bupropion · Cytomel 12.5mcg'},
+    {time:'7:00 AM',icon:'🏋️',title:'Training session',detail:'Check workout app for today\'s exercises. 45-60 min. Stomach vacuums in core section.'},
+    {time:'Post-workout',icon:'🍗',title:'FORCE a protein meal',detail:'Retatrutide kills appetite — eat anyway. 40-50g protein minimum. This protects muscle.'},
+    {time:'3:00 PM',icon:'🌿',title:'Selank nasal spray',detail:'1-2 sprays each nostril — patience buffer for family/social transition.'},
+    {time:'Throughout',icon:'💧',title:'4 litres water',detail:'Non-negotiable. Retatrutide + peptide clearance depends on hydration.'},
+    {time:'8:00 PM',icon:'🌙',title:'Night stack',detail:'Magnesium Glycinate 300mg · L-Theanine 200mg · Gabapentin (as prescribed)'},
+    {time:'8:00 PM',icon:'💉',title:'Epithalon + DSIP (during cycle only)',detail:'Combined syringe — 26 units. Split Epithalon into 2×25 units at different sites.'},
+    {time:'9:00 PM',icon:'📵',title:'Phone in another room',detail:'Screen light completely overrides the 8PM sleep stack. Non-negotiable.'},
+  ];
+
+  const routineRest=[
+    {time:'6:00 AM',icon:'⏰',title:'Wake up — outside immediately',detail:'Natural light clears Gabapentin grogginess.'},
+    {time:'6:15 AM',icon:'💉',title:'Growth Hormone (Arctotropin)',detail:'2 IU SubQ — solo, first thing.'},
+    {time:'6:20 AM',icon:'💉',title:'KLOW/REGEN + MitoStack combined',detail:'One syringe — 11 units. SubQ abdomen.'},
+    {time:'6:30 AM',icon:'💊',title:'Morning oral stack',detail:'Alpha GPC · Creatine 5g · Sulforaphane · Fish Oil + CoQ10 · Atorvastatin · Bupropion · Cytomel'},
+    {time:'7:00 AM',icon:'🚶',title:'Morning walk — Zone 2',detail:'Easy pace, conversational. 20-30 min. ACL-friendly. Fasted walk amplifies fat burning.'},
+    {time:'Anytime',icon:'🎯',title:'Stomach vacuums — daily habit',detail:'3 × 10-30 sec holds. Can do anywhere — car, desk, couch. Building toward 30 sec holds.'},
+    {time:'3:00 PM',icon:'🌿',title:'Selank nasal spray',detail:'1-2 sprays each nostril.'},
+    {time:'Throughout',icon:'💧',title:'4 litres water',detail:'Every day including rest days.'},
+    {time:'8:00 PM',icon:'🌙',title:'Night stack',detail:'Magnesium Glycinate · L-Theanine · Gabapentin'},
+    {time:'9:00 PM',icon:'📵',title:'Phone away',detail:'Protect your sleep stack.'},
+  ];
+
+  const today=new Date();
+  const dow=today.getDay();
+  const isWorkout=[1,3,5].includes(dow);
+
+  const routine=isWorkout?routineWorkout:routineRest;
+  const label=isWorkout?'WORKOUT DAY ROUTINE':'REST DAY ROUTINE';
+  const labelColor=isWorkout?'var(--gold)':'var(--green)';
+
+  let html=`<div style="display:flex;gap:8px;margin-bottom:14px">
+    <div style="flex:1;padding:10px;background:${isWorkout?'rgba(245,158,11,0.15)':'rgba(34,197,94,0.08)'};border:1px solid ${isWorkout?'rgba(245,158,11,0.4)':'rgba(34,197,94,0.3)'};border-radius:10px;text-align:center">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;color:${labelColor}">${label}</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px">Today — ${today.toLocaleDateString('en-US',{weekday:'long'})}</div>
+    </div>
+  </div>`;
+
+  routine.forEach(r=>{
+    html+=`<div style="display:flex;gap:12px;padding:10px 14px;background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:8px">
+      <div style="font-size:20px;flex-shrink:0;width:28px;text-align:center">${r.icon}</div>
+      <div style="flex:1">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+          <div style="font-weight:600;font-size:14px">${r.title}</div>
+          <div style="font-size:11px;color:var(--accent);font-weight:700;white-space:nowrap;margin-left:8px">${r.time}</div>
+        </div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.5">${r.detail}</div>
+      </div>
+    </div>`;
+  });
+
+  document.getElementById('main-content').innerHTML=html;
+}
+
+// ── TAB ROUTER ──────────────────────────────────────────
+let currentTab='calendar';
+function showTab(name,btn){
+  currentTab=name;
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  if(name==='calendar') renderCalendar();
+  else if(name==='upcoming') renderUpcoming();
+  else if(name==='addcal') renderAddCal();
+  else if(name==='routine') renderRoutine();
+}
+
+renderCalendar();
+</script>
+</body>
+</html>
